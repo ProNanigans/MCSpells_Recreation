@@ -1,7 +1,9 @@
 package me.nanigans.potterworldspells.Utils;
 
 import me.nanigans.potterworldspells.PotterWorldSpells;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -23,6 +25,12 @@ public class ItemUtils {
 
     public static <T, Z> boolean hasNBT(ItemStack item, String key, PersistentDataType<T, Z> type){
         return item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, key), type);
+    }
+
+    public static Inventory cloneInvContents(Inventory toClone){
+        Inventory inv = Bukkit.createInventory(toClone.getHolder(), toClone.getSize());
+        inv.setContents(toClone.getContents());
+        return inv;
     }
 
 }
