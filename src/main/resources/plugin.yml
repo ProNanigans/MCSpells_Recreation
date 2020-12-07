@@ -1,0 +1,6 @@
+name: PotterWorldSpells
+version: ${project.version}
+main: me.nanigans.potterworldspells.PotterWorldSpells
+api-version: 1.16
+authors: [ProNanigans]
+description: Remake of potterworld spells better this time
