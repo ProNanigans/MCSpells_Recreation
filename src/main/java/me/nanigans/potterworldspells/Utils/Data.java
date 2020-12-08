@@ -5,8 +5,8 @@ import org.bukkit.persistence.PersistentDataType;
 public enum Data {
 
     INVENTORY("Inventory", PersistentDataType.STRING),
-    SPELLSEPARATOR(",,", null),
     ISWAND("IsWand", PersistentDataType.BYTE),
+    PAGENUM("Page", PersistentDataType.INTEGER),
     SPELL_INVENTORY("Spell_Inventory", PersistentDataType.STRING);
 
 

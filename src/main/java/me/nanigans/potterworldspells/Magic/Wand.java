@@ -26,8 +26,8 @@ import java.util.UUID;
 public class Wand implements Listener {
 
     private final Player player;
-    private final ItemStack wand;
-    private byte wandPage = 0;
+    private ItemStack wand;
+    private int wandPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     private static Map<UUID, Byte> wandPageSave = new HashMap<>();
     public static Map<UUID, Wand> inWand = new HashMap<>();
@@ -35,9 +35,9 @@ public class Wand implements Listener {
     public Wand(Player player){
         this.player = player;
         this.wand = player.getInventory().getItemInMainHand();
+        inWand.put(player.getUniqueId(), this);
         ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        inWand.put(player.getUniqueId(), this);
 
     }
 
@@ -66,11 +66,16 @@ public class Wand implements Listener {
     public void closeWand(){
         if(inWand.containsKey(player.getUniqueId())){
 
-            saveWandInventory();
-            clearAllNotWand();
-            inWand.remove(player.getUniqueId());
-            loadInventory();
-            HandlerList.unregisterAll(this);
+            try {
+                player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage));
+                saveWandInventory();
+                inWand.remove(player.getUniqueId());
+                clearAllNotWand();
+                loadInventory();
+                HandlerList.unregisterAll(this);
+            }catch(AssertionError err){
+                err.printStackTrace();
+            }
 
         }
     }
@@ -113,12 +118,10 @@ public class Wand implements Listener {
         final FileConfiguration data = yaml.getData();
 
         final Map<String, Object> spells =
-                YamlGenerator.getConfigSectionValue(data.get(YamlPaths.SPELL_INVENTORY.getPath()), true);
+                YamlGenerator.getConfigSectionValue(data.get(YamlPaths.SPELL_INVENTORY.getPath()+"."+wandPage), true);
         if(spells != null) {
             clearAllNotWand();
-            spells.forEach((i, j) -> {
-                player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j);
-            });
+            spells.forEach((i, j) -> player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j));
         }else{
             setUpInventory();
         }
@@ -138,9 +141,7 @@ public class Wand implements Listener {
                 .get(YamlPaths.INVENTORY.getPath()), true);
         clearAllNotWand();
         if(playerItems != null){
-            playerItems.forEach((i, j) -> {
-                player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j);
-            });
+            playerItems.forEach((i, j) -> player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j));
         }
 
     }
@@ -184,7 +185,8 @@ public class Wand implements Listener {
 
         YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
         final FileConfiguration data = yaml.getData();
-        data.set(YamlPaths.SPELL_INVENTORY.getPath(), itemStackMap);
+        data.set(YamlPaths.SPELL_INVENTORY.getPath()+"."+wandPage, itemStackMap);
+
         yaml.save();
     }
 
@@ -193,9 +195,11 @@ public class Wand implements Listener {
      */
     private void clearAllNotWand(){
 
-        for (int i = 0; i < player.getInventory().getStorageContents().length; i++) {
-            if(player.getInventory().getStorageContents()[i] != null && !player.getInventory().getStorageContents()[i].equals(wand)){
-                player.getInventory().setItem(i, null);
+        for(ItemStack item : player.getInventory().getStorageContents()) {
+            if (item != null) {
+                if (!item.isSimilar(this.wand)) {
+                    player.getInventory().removeItem(item);
+                }
             }
         }
 
