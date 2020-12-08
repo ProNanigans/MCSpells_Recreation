@@ -1,5 +1,6 @@
 package me.nanigans.potterworldspells.Magic;
 
+import me.nanigans.potterworldspells.Magic.SpellsTypes.Spell;
 import me.nanigans.potterworldspells.PotterWorldSpells;
 import me.nanigans.potterworldspells.Utils.Config.FilePaths;
 import me.nanigans.potterworldspells.Utils.Config.YamlGenerator;
@@ -28,6 +29,7 @@ public class Wand implements Listener {
     private int wandPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
+    private List<Spell> activeSpells = new ArrayList<>();
 
     public Wand(Player player){
         this.player = player;
@@ -214,6 +216,14 @@ public class Wand implements Listener {
             }
         }
 
+    }
+
+    public List<Spell> getActiveSpells() {
+        return activeSpells;
+    }
+
+    public void setActiveSpells(List<Spell> activeSpells) {
+        this.activeSpells = activeSpells;
     }
 
     /**
