@@ -29,29 +29,47 @@ public class Wand implements Listener {
     private byte wandPage = 0;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     private static Map<UUID, Byte> wandPageSave = new HashMap<>();
-    private static Map<UUID, Boolean> inWand = new HashMap<>();
+    public static Map<UUID, Wand> inWand = new HashMap<>();
 
     public Wand(Player player){
         this.player = player;
         this.wand = player.getInventory().getItemInMainHand();
         savePlayerInventory();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        inWand.put(player.getUniqueId(), true);
+        inWand.put(player.getUniqueId(), this);
 
     }
 
 
+    /**
+     * Handles the right click event for when a player wants to close their wand inventory
+     * @param event PlayerInteractEvent for when a player right clicks their mouse
+     */
     @EventHandler
-    public void closeInventory(PlayerInteractEvent event) throws Throwable {
+    public void rightClick(PlayerInteractEvent event) {
         System.out.println(event.getAction());
         if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())){
             if(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                inWand.remove(event.getPlayer().getUniqueId());
-                saveWandInventory();
-                clearAllNotWand();
-                loadPlayerInventory();
-                HandlerList.unregisterAll(this);
+                closeWand();
             }
+
+        }
+    }
+
+
+    /**
+     * Closes the current wand object. First it saves the wand inventory, then it clears the inventory except the wand
+     * then it loads the players inventory and then it unregisters this event and removes the player from the players
+     * that are in their wand inventory
+     */
+    public void closeWand(){
+        if(inWand.containsKey(player.getUniqueId())){
+
+            saveWandInventory();
+            clearAllNotWand();
+            loadPlayerInventory();
+            HandlerList.unregisterAll(this);
+            inWand.remove(player.getUniqueId());
 
         }
     }

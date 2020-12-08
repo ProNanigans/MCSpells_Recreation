@@ -2,8 +2,11 @@ package me.nanigans.potterworldspells;
 
 import me.nanigans.potterworldspells.Commands.GiveWand;
 import me.nanigans.potterworldspells.Events.WandClickEvents;
+import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.Utils.Config.FilePaths;
 import me.nanigans.potterworldspells.Utils.Config.PathCreator;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -27,5 +30,9 @@ public final class PotterWorldSpells extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        Wand.inWand.forEach((i, j) -> {
+            Player p = Bukkit.getPlayer(i);
+            j.closeWand();
+        });
     }
 }
