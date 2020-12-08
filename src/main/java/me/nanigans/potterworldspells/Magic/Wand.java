@@ -48,7 +48,6 @@ public class Wand implements Listener {
      */
     @EventHandler
     public void rightClick(PlayerInteractEvent event) {
-        System.out.println(event.getAction());
         if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())){
             if(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 closeWand();
