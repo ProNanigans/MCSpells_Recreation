@@ -10,7 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 public class GiveWand implements CommandExecutor {
 
@@ -25,7 +24,7 @@ public class GiveWand implements CommandExecutor {
                 ItemMeta meta = wand.getItemMeta();
                 meta.setCustomModelData(34);//item key type value
                 meta.setDisplayName(ChatColor.AQUA+"Wand");
-                ItemUtils.setData(wand, Data.ISWAND.toString(), Data.ISWAND.getType(), 0);
+                ItemUtils.setData(wand, Data.ISWAND.toString(), Data.ISWAND.getType(), (byte)0);
 
                 player.getInventory().addItem(wand);
                 player.sendMessage(ChatColor.GREEN+"Wand given!");

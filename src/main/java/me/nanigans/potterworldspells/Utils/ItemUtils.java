@@ -24,13 +24,23 @@ public class ItemUtils {
     }
 
     public static <T, Z> boolean hasNBT(ItemStack item, String key, PersistentDataType<T, Z> type){
+        if(item.getItemMeta() == null) return false;
         return item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, key), type);
     }
 
     public static Inventory cloneInvContents(Inventory toClone){
-        Inventory inv = Bukkit.createInventory(toClone.getHolder(), toClone.getSize());
+        Inventory inv = Bukkit.createInventory(toClone.getHolder(), toClone.getType());
         inv.setContents(toClone.getContents());
         return inv;
+    }
+
+
+    public static String serealizeItem(ItemStack item){
+
+        ItemMeta meta = item.getItemMeta();
+        StringBuilder builder = new StringBuilder();
+        builder.append(meta.getDisplayName()+":"+)
+
     }
 
 }

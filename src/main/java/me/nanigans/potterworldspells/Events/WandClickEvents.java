@@ -1,6 +1,7 @@
 package me.nanigans.potterworldspells.Events;
 
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.ItemUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,11 +20,10 @@ public class WandClickEvents implements Listener {
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR){
 
             Player player = event.getPlayer();
-            if(player.getInventory().getItemInMainHand().getType() == Material.DIAMOND_HOE){
+            if(player.getInventory().getItemInMainHand().getType() == Material.DIAMOND_HOE && !Wand.inWandInv(player)){
                 ItemStack item = player.getInventory().getItemInMainHand();
-
-                if (ItemUtils.hasNBT(item, "IsWand", PersistentDataType.BYTE)) {
-                    new Wand(player);
+                if (ItemUtils.hasNBT(item, Data.ISWAND.toString(), PersistentDataType.BYTE)) {
+                    new Wand(player).loadInventory();
                 }
             }
 

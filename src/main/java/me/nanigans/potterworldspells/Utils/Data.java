@@ -4,9 +4,10 @@ import org.bukkit.persistence.PersistentDataType;
 
 public enum Data {
 
+    INVENTORY("Inventory", PersistentDataType.STRING),
     SPELLSEPARATOR(",,", null),
     ISWAND("IsWand", PersistentDataType.BYTE),
-    SPELL_INVENTORY("Inventory", PersistentDataType.TAG_CONTAINER_ARRAY);
+    SPELL_INVENTORY("Spell_Inventory", PersistentDataType.STRING);
 
 
     String name;
