@@ -1,12 +1,21 @@
 package me.nanigans.potterworldspells.Utils;
 
 import me.nanigans.potterworldspells.PotterWorldSpells;
+import me.nanigans.potterworldspells.Utils.Config.FilePaths;
+import me.nanigans.potterworldspells.Utils.Config.YamlGenerator;
+import me.nanigans.potterworldspells.Utils.Config.YamlPaths;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ItemUtils {
     private static PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
@@ -34,12 +43,19 @@ public class ItemUtils {
         return inv;
     }
 
+    public static void saveInventory(Player player, String path, String yamlPath, ItemStack... ignored){
 
-    public static String serealizeItem(ItemStack item){
-
-        ItemMeta meta = item.getItemMeta();
-        StringBuilder builder = new StringBuilder();
-        builder.append(meta.getDisplayName()+":"+)
+        YamlGenerator yaml = new YamlGenerator(path);
+        final FileConfiguration data = yaml.getData();
+        Map<Integer, ItemStack> saveMap = new HashMap<>();
+        final ItemStack[] storageContents = player.getInventory().getStorageContents();
+        for (int i = 0; i < storageContents.length; i++) {
+            final int finalI = i;
+            if(Arrays.stream(ignored).noneMatch(j -> j.equals(storageContents[finalI]))){
+                saveMap.put(i, storageContents[i]);
+            }
+        }
+        data.set(yamlPath, saveMap);
 
     }
 

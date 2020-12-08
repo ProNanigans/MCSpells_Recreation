@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -34,7 +35,7 @@ public class Wand implements Listener {
     public Wand(Player player){
         this.player = player;
         this.wand = player.getInventory().getItemInMainHand();
-        savePlayerInventory();
+        ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         inWand.put(player.getUniqueId(), this);
 
@@ -67,9 +68,9 @@ public class Wand implements Listener {
 
             saveWandInventory();
             clearAllNotWand();
-            loadPlayerInventory();
-            HandlerList.unregisterAll(this);
             inWand.remove(player.getUniqueId());
+            loadInventory();
+            HandlerList.unregisterAll(this);
 
         }
     }
@@ -79,21 +80,73 @@ public class Wand implements Listener {
      */
     public void loadInventory(){
 
+        File file = new File(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
         if(inWand.containsKey(player.getUniqueId())) {
-            if (ItemUtils.hasNBT(wand, Data.SPELL_INVENTORY.toString() + wandPage, Data.SPELL_INVENTORY.getType())) {
+            if (file.exists()) {
 
-                //plugin.getConfig().getItemStack()
+                loadPlayerSpells(file);
 
             } else {// we need to create the first inventory
                 setUpInventory();
             }
         }else{
 
+            if(file.exists()){
+
+                loadPlayerItems(file);
+
+            }
+
         }
 
     }
 
-    private void loadPlayerInventory(){
+    /**
+     * Loads the players spell inventory into their inventory and replaces all current items with nothing
+     * @param fromFile the file to get the inventory from
+     * @requires fromFile to exist
+     */
+
+    private void loadPlayerSpells(File fromFile){
+
+        YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
+        final FileConfiguration data = yaml.getData();
+
+        final Map<String, Object> spells =
+                YamlGenerator.getConfigSectionValue(data.get(YamlPaths.SPELL_INVENTORY.getPath()), true);
+        if(spells != null) {
+            spells.forEach((i, j) -> {
+                clearAllNotWand();
+                player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j);
+            });
+        }else{
+            System.out.println("Spells was null at line 123");
+        }
+
+    }
+
+    /**
+     * Loads the players original inventory to their inventory and replaces all spells with nothing
+     * @param fromFile the file to get the inventory from
+     * @requires fromFile to exist
+     */
+    private void loadPlayerItems(File fromFile){
+
+        YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
+        final FileConfiguration data = yaml.getData();
+        final Map<String, Object> playerItems = YamlGenerator.getConfigSectionValue(data
+                .get(YamlPaths.INVENTORY.getPath()), true);
+
+        if(playerItems != null){
+            playerItems.forEach((i, j) -> {
+                clearAllNotWand();
+                player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j);
+            });
+        }
+
+    }
+
+    private void loadSpells(){
         String s = ItemUtils.getNBT(wand, Data.INVENTORY.toString(), Data.INVENTORY.getType()).toString();
         String[] items = s.split(Data.SPELLSEPARATOR.toString());
         //List<ItemStack> itemList = items.stream
@@ -104,6 +157,8 @@ public class Wand implements Listener {
      * modifying the wand
      */
     private void setUpInventory(){
+
+        ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
 
         final Spells[] values = Spells.values();
         Map<Integer, ItemStack> inventorySpellPlacement = new HashMap<>();
@@ -123,24 +178,6 @@ public class Wand implements Listener {
     }
 
     /**
-     * Saves the player inventory to their respective yaml file
-     */
-    private void savePlayerInventory(){
-
-        ItemStack[] items = player.getInventory().getStorageContents();
-        Map<Integer, ItemStack> itemStackMap = new HashMap<>();
-        for (int i = 0; i < items.length; i++) {
-            if(!items[i].equals(wand))
-                itemStackMap.put(i, items[i]);
-        }
-
-        YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
-        final FileConfiguration data = yaml.getData();
-        data.set(YamlPaths.INVENTORY.getPath(), itemStackMap);
-        yaml.save();
-    }
-
-    /**
      * This will save the current open inventory minus the wand
      */
     private void saveWandInventory(){
@@ -156,23 +193,6 @@ public class Wand implements Listener {
         final FileConfiguration data = yaml.getData();
         data.set(YamlPaths.SPELL_INVENTORY.getPath(), items);
         yaml.save();
-//
-//        Inventory inv = ItemUtils.cloneInvContents(player.getInventory());
-//        inv.removeItem(player.getInventory().getItemInMainHand());
-//        System.out.println(inWandInv(player) + " 1");
-//        if(inWandInv(player)){
-//            ItemUtils.setData(wand, Data.SPELL_INVENTORY.toString()+wandPage, Data.SPELL_INVENTORY.getType(), Arrays.stream(inv.getContents())
-//                    .map(ItemStack::toString).collect(Collectors.joining(Data.SPELLSEPARATOR.toString())));
-//            wandPageSave.put(player.getUniqueId(), wandPage);
-//        }else{
-//            ItemUtils.setData(wand, Data.INVENTORY.toString(), Data.INVENTORY.getType(), Arrays.stream(inv.getContents()).filter(Objects::nonNull)
-//                    .map(ItemStack::toString).collect(Collectors.joining(Data.SPELLSEPARATOR.toString())));
-//        }
-//
-//        if(clear){
-//            clearAllNotWand();
-//        }
-
     }
 
     /**
