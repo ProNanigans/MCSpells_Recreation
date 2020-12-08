@@ -1,23 +1,26 @@
 package me.nanigans.potterworldspells.Magic;
 
 import me.nanigans.potterworldspells.PotterWorldSpells;
+import me.nanigans.potterworldspells.Utils.Config.FilePaths;
+import me.nanigans.potterworldspells.Utils.Config.YamlGenerator;
+import me.nanigans.potterworldspells.Utils.Config.YamlPaths;
 import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.ItemUtils;
 import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Wand implements Listener {
 
@@ -31,7 +34,9 @@ public class Wand implements Listener {
     public Wand(Player player){
         this.player = player;
         this.wand = player.getInventory().getItemInMainHand();
+        savePlayerInventory();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        inWand.put(player.getUniqueId(), true);
 
     }
 
@@ -40,9 +45,10 @@ public class Wand implements Listener {
     public void closeInventory(PlayerInteractEvent event) throws Throwable {
         System.out.println(event.getAction());
         if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())){
-            if(event.getAction().toString().toLowerCase().contains("right")) {
+            if(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 inWand.remove(event.getPlayer().getUniqueId());
-                saveInventory(true);
+                saveWandInventory();
+                clearAllNotWand();
                 loadPlayerInventory();
                 HandlerList.unregisterAll(this);
             }
@@ -55,13 +61,16 @@ public class Wand implements Listener {
      */
     public void loadInventory(){
 
-        inWand.put(player.getUniqueId(), true);
-        if(ItemUtils.hasNBT(wand, Data.SPELL_INVENTORY.toString()+wandPage, Data.SPELL_INVENTORY.getType())){
+        if(inWand.containsKey(player.getUniqueId())) {
+            if (ItemUtils.hasNBT(wand, Data.SPELL_INVENTORY.toString() + wandPage, Data.SPELL_INVENTORY.getType())) {
 
-            plugin.getConfig().getItemStack()
+                //plugin.getConfig().getItemStack()
 
-        }else{// we need to create the first inventory
-            setUpInventory();
+            } else {// we need to create the first inventory
+                setUpInventory();
+            }
+        }else{
+
         }
 
     }
@@ -69,7 +78,7 @@ public class Wand implements Listener {
     private void loadPlayerInventory(){
         String s = ItemUtils.getNBT(wand, Data.INVENTORY.toString(), Data.INVENTORY.getType()).toString();
         String[] items = s.split(Data.SPELLSEPARATOR.toString());
-        List<ItemStack> itemList = items.stream
+        //List<ItemStack> itemList = items.stream
     }
 
     /**
@@ -96,25 +105,55 @@ public class Wand implements Listener {
     }
 
     /**
-     * This will save the current open inventory minus the wand
-     * @param clear weather to clear the inventory or not
+     * Saves the player inventory to their respective yaml file
      */
-    private void saveInventory(boolean clear){
-        Inventory inv = ItemUtils.cloneInvContents(player.getInventory());
-        inv.removeItem(player.getInventory().getItemInMainHand());
-        System.out.println(inWandInv(player) + " 1");
-        if(inWandInv(player)){
-            ItemUtils.setData(wand, Data.SPELL_INVENTORY.toString()+wandPage, Data.SPELL_INVENTORY.getType(), Arrays.stream(inv.getContents())
-                    .map(ItemStack::toString).collect(Collectors.joining(Data.SPELLSEPARATOR.toString())));
-            wandPageSave.put(player.getUniqueId(), wandPage);
-        }else{
-            ItemUtils.setData(wand, Data.INVENTORY.toString(), Data.INVENTORY.getType(), Arrays.stream(inv.getContents()).filter(Objects::nonNull)
-                    .map(ItemStack::toString).collect(Collectors.joining(Data.SPELLSEPARATOR.toString())));
+    private void savePlayerInventory(){
+
+        ItemStack[] items = player.getInventory().getStorageContents();
+        Map<Integer, ItemStack> itemStackMap = new HashMap<>();
+        for (int i = 0; i < items.length; i++) {
+            if(!items[i].equals(wand))
+                itemStackMap.put(i, items[i]);
         }
 
-        if(clear){
-            clearAllNotWand();
+        YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
+        final FileConfiguration data = yaml.getData();
+        data.set(YamlPaths.INVENTORY.getPath(), itemStackMap);
+        yaml.save();
+    }
+
+    /**
+     * This will save the current open inventory minus the wand
+     */
+    private void saveWandInventory(){
+
+        ItemStack[] items = player.getInventory().getStorageContents();
+        Map<Integer, ItemStack> itemStackMap = new HashMap<>();
+        for(int i = 0; i < items.length; i++){
+            if(!items[i].equals(wand))
+                itemStackMap.put(i, items[i]);
         }
+
+        YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
+        final FileConfiguration data = yaml.getData();
+        data.set(YamlPaths.SPELL_INVENTORY.getPath(), items);
+        yaml.save();
+//
+//        Inventory inv = ItemUtils.cloneInvContents(player.getInventory());
+//        inv.removeItem(player.getInventory().getItemInMainHand());
+//        System.out.println(inWandInv(player) + " 1");
+//        if(inWandInv(player)){
+//            ItemUtils.setData(wand, Data.SPELL_INVENTORY.toString()+wandPage, Data.SPELL_INVENTORY.getType(), Arrays.stream(inv.getContents())
+//                    .map(ItemStack::toString).collect(Collectors.joining(Data.SPELLSEPARATOR.toString())));
+//            wandPageSave.put(player.getUniqueId(), wandPage);
+//        }else{
+//            ItemUtils.setData(wand, Data.INVENTORY.toString(), Data.INVENTORY.getType(), Arrays.stream(inv.getContents()).filter(Objects::nonNull)
+//                    .map(ItemStack::toString).collect(Collectors.joining(Data.SPELLSEPARATOR.toString())));
+//        }
+//
+//        if(clear){
+//            clearAllNotWand();
+//        }
 
     }
 
