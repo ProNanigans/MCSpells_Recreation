@@ -29,7 +29,6 @@ public class Wand implements Listener {
     private ItemStack wand;
     private int wandPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
-    private static Map<UUID, Byte> wandPageSave = new HashMap<>();
     public static Map<UUID, Wand> inWand = new HashMap<>();
 
     public Wand(Player player){
@@ -120,7 +119,15 @@ public class Wand implements Listener {
                 YamlGenerator.getConfigSectionValue(data.get(YamlPaths.SPELL_INVENTORY.getPath()+"."+wandPage), true);
         if(spells != null) {
             clearAllNotWand();
-            spells.forEach((i, j) -> player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j));
+            spells.forEach((i, j) ->{
+                int pos = Integer.parseInt(i);
+                if(pos < 9){
+                    int handPos = player.getInventory().getHeldItemSlot();
+                    if(pos == handPos)
+                        pos = player.getInventory().firstEmpty();
+                }
+                player.getInventory().setItem(pos, (ItemStack) j);
+            });
         }else{
             setUpInventory();
         }

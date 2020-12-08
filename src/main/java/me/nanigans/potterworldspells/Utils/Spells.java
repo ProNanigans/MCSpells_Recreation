@@ -2,7 +2,9 @@ package me.nanigans.potterworldspells.Utils;
 
 public enum Spells {
 
-    FLIPPENDO("Flippendo", 34);//name, custom model data
+    FLIPPENDO("Anti Apparate", 2),//name, custom model data
+    ACCIO("Accio", 3),
+    AGUAMENTI("Aguamenti", 4);
     String name;
     int data;
 
