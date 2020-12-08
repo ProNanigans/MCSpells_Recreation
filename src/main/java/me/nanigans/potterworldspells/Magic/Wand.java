@@ -19,9 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class Wand implements Listener {
 
@@ -119,6 +117,7 @@ public class Wand implements Listener {
                 YamlGenerator.getConfigSectionValue(data.get(YamlPaths.SPELL_INVENTORY.getPath()+"."+wandPage), true);
         if(spells != null) {
             clearAllNotWand();
+
             spells.forEach((i, j) ->{
                 int pos = Integer.parseInt(i);
                 if(pos < 9){
@@ -161,19 +160,25 @@ public class Wand implements Listener {
         ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
 
         final Spells[] values = Spells.values();
-        Map<Integer, ItemStack> inventorySpellPlacement = new HashMap<>();
+        Map<String, Map<Integer, ItemStack>> inventorySpellPlacement = new HashMap<>();
+        Map<Integer, ItemStack> spellPlacement = new HashMap<>();
+
+        int invNum = wandPage;
         for (int i = 0; i < values.length; i++) {
+            if(i >= player.getInventory().getStorageContents().length){
+                inventorySpellPlacement.put(String.valueOf(invNum), spellPlacement);
+                invNum++;
+            }
             ItemStack item = new ItemStack(Material.DIAMOND_AXE);
             final ItemMeta itemMeta = item.getItemMeta();
             itemMeta.setDisplayName(values[i].getName());
             itemMeta.setCustomModelData(values[i].getData());
             item.setItemMeta(itemMeta);
-            inventorySpellPlacement.put(i, item);
+            spellPlacement.put(i, item);
         }
-        inventorySpellPlacement.put(inventorySpellPlacement.size(), inventorySpellPlacement.get(player.getInventory().getHeldItemSlot()));
-        inventorySpellPlacement.replace(player.getInventory().getHeldItemSlot(), player.getInventory().getItemInMainHand());//remove wand
-        player.getInventory().clear();
-        inventorySpellPlacement.forEach((i, j) -> player.getInventory().setItem(i, j));
+        inventorySpellPlacement.put(String.valueOf(invNum), spellPlacement);
+        clearAllNotWand();
+        inventorySpellPlacement.get(String.valueOf(wandPage)).forEach((i, j) -> player.getInventory().addItem(j));
 
     }
 
