@@ -51,11 +51,12 @@ public class ItemUtils {
         final ItemStack[] storageContents = player.getInventory().getStorageContents();
         for (int i = 0; i < storageContents.length; i++) {
             final int finalI = i;
-            if(Arrays.stream(ignored).noneMatch(j -> j.equals(storageContents[finalI]))){
+            if(storageContents[i] != null && Arrays.stream(ignored).noneMatch(j -> j.equals(storageContents[finalI]))){
                 saveMap.put(i, storageContents[i]);
             }
         }
         data.set(yamlPath, saveMap);
+        yaml.save();
 
     }
 

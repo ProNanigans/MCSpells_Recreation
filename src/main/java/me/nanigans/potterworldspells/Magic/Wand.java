@@ -115,12 +115,12 @@ public class Wand implements Listener {
         final Map<String, Object> spells =
                 YamlGenerator.getConfigSectionValue(data.get(YamlPaths.SPELL_INVENTORY.getPath()), true);
         if(spells != null) {
+            clearAllNotWand();
             spells.forEach((i, j) -> {
-                clearAllNotWand();
                 player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j);
             });
         }else{
-            System.out.println("Spells was null at line 123");
+            setUpInventory();
         }
 
     }
@@ -136,20 +136,13 @@ public class Wand implements Listener {
         final FileConfiguration data = yaml.getData();
         final Map<String, Object> playerItems = YamlGenerator.getConfigSectionValue(data
                 .get(YamlPaths.INVENTORY.getPath()), true);
-
+        clearAllNotWand();
         if(playerItems != null){
             playerItems.forEach((i, j) -> {
-                clearAllNotWand();
                 player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j);
             });
         }
 
-    }
-
-    private void loadSpells(){
-        String s = ItemUtils.getNBT(wand, Data.INVENTORY.toString(), Data.INVENTORY.getType()).toString();
-        String[] items = s.split(Data.SPELLSEPARATOR.toString());
-        //List<ItemStack> itemList = items.stream
     }
 
     /**
@@ -185,13 +178,13 @@ public class Wand implements Listener {
         ItemStack[] items = player.getInventory().getStorageContents();
         Map<Integer, ItemStack> itemStackMap = new HashMap<>();
         for(int i = 0; i < items.length; i++){
-            if(!items[i].equals(wand))
+            if(items[i] != null && !items[i].equals(wand))
                 itemStackMap.put(i, items[i]);
         }
 
         YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
         final FileConfiguration data = yaml.getData();
-        data.set(YamlPaths.SPELL_INVENTORY.getPath(), items);
+        data.set(YamlPaths.SPELL_INVENTORY.getPath(), itemStackMap);
         yaml.save();
     }
 
@@ -200,8 +193,8 @@ public class Wand implements Listener {
      */
     private void clearAllNotWand(){
 
-        for (int i = 0; i < player.getInventory().getContents().length; i++) {
-            if(!ItemUtils.hasNBT(player.getInventory().getItemInMainHand(), Data.ISWAND.toString(), Data.ISWAND.getType())){
+        for (int i = 0; i < player.getInventory().getStorageContents().length; i++) {
+            if(player.getInventory().getStorageContents()[i] != null && !player.getInventory().getStorageContents()[i].equals(wand)){
                 player.getInventory().setItem(i, null);
             }
         }
