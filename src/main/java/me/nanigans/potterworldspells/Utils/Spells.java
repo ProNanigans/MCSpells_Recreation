@@ -4,6 +4,7 @@ public enum Spells {
 
     ANTI_APPARATE("Anti Apparate", 2, "CrowdControl"),//name, custom model data
     ACCIO("Accio", 3, "CrowdControl"),
+    APPARATE("Apparate", 9, "Mobility"),
     AGUAMENTI("Aguamenti", 4, "Combat");
     String name, spellType;
     int data;

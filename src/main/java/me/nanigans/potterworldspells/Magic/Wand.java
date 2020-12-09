@@ -104,8 +104,10 @@ public class Wand implements Listener {
                 meta.setDisplayName(ChatColor.GOLD + spellName + " " + ChatColor.DARK_GRAY + "(" + ChatColor.DARK_AQUA + "Wand" +
                         ChatColor.DARK_GRAY + ")");
                 wand.setItemMeta(meta);
-                ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
-                        ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
+                if(ItemUtils.hasNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType())) {
+                    ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
+                            ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
+                }
 
                 player.getInventory().getItemInMainHand().setItemMeta(meta);
                 player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), spellName));
@@ -125,10 +127,10 @@ public class Wand implements Listener {
             try {
                 player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage));
                 saveWandInventory();
-                inWand.remove(player.getUniqueId());
                 clearAllNotWand();
                 loadInventory();
                 HandlerList.unregisterAll(this);
+                inWand.remove(player.getUniqueId());
             }catch(AssertionError err){
                 err.printStackTrace();
             }

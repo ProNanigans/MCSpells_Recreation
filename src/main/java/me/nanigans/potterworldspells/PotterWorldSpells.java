@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
+import java.util.ConcurrentModificationException;
 
 public final class PotterWorldSpells extends JavaPlugin {
 
@@ -31,8 +32,9 @@ public final class PotterWorldSpells extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         Wand.inWand.forEach((i, j) -> {
-            Player p = Bukkit.getPlayer(i);
-            j.closeWand();
+            try {
+                j.closeWand();
+            }catch(ConcurrentModificationException ignored){}
         });
     }
 }
