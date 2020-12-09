@@ -281,6 +281,10 @@ public class Wand implements Listener {
 
     }
 
+    public PotterWorldSpells getPlugin() {
+        return plugin;
+    }
+
     public double getMana() {
         return mana;
     }
