@@ -1,5 +1,7 @@
 package me.nanigans.potterworldspells.Magic.Spells.Mobility;
 
+import de.slikey.effectlib.effect.AnimatedBallEffect;
+import de.slikey.effectlib.util.DynamicLocation;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Mobility;
 import me.nanigans.potterworldspells.Magic.Wand;
 import org.bukkit.Color;
@@ -8,39 +10,33 @@ import org.bukkit.Particle;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 public class Apparate extends Mobility {
 
-    enum SpellData{
-        SPEED(0L),
-        GRAVITY(0D),
-        DISTANCE(25D),
-        SPACING(0.5),
-        PARTICLECOLOR(new Particle.DustOptions(
-                Color.AQUA, 1f
-        )),
-        PARTICLE(Particle.REDSTONE);
-        public Object value;
-
-        SpellData(Object d) {
-            this.value = d;
-        }
-
-        public String getValue() {
-            return value.toString();
-        }
-    }
-
+    private long speed = 0;
+    private double gravity = 0;
+    private double distance = 25D;
+    private double spacing = 0.5;
+    private Particle.DustOptions color = new Particle.DustOptions(
+        Color.AQUA, 1f
+    );
+    private Particle particle = Particle.REDSTONE;
 
     public Apparate(Wand wand) {
         super(wand);
+
+        AnimatedBallEffect ball = new AnimatedBallEffect(plugin.manager);
+        ball.color = color.getColor();
+        ball.setEntity(player);
+        ball.asynchronous = true;
+        ball.iterations = 20;
+        ball.yOffset = -0.32F;
+        ball.yFactor = 1.5F;
+        ball.particle = particle;
+        ball.start();
+
         player.getWorld().playSound(player.getLocation(), "magic.apparate", 1, 1);
 
-        super.cast(Double.parseDouble(SpellData.DISTANCE.getValue()), Double.parseDouble(SpellData.SPACING.getValue()),
-                Long.parseLong(SpellData.SPEED.getValue()), this::whileFiring, this::onHit);
+        super.cast(distance, spacing, speed, this::whileFiring, this::onHit);
 
     }
 
@@ -49,7 +45,7 @@ public class Apparate extends Mobility {
             @Override
             public void run() {
                 final Location location = new Location(player.getWorld(), hit.getX(), hit.getY(), hit.getZ(), player.getLocation().getYaw(), player.getLocation().getPitch());
-                player.teleport(location);
+                player.teleport(location.clone().add(0, 1.5, 0));
                 player.getWorld().playSound(player.getLocation(), "magic.apparate", 1, 1);
 
             }
@@ -57,9 +53,15 @@ public class Apparate extends Mobility {
     }
 
     protected Location whileFiring(Vector p1, Vector vector){
+        player.getWorld().spawnParticle(particle, p1.getX(), p1.getY(), p1.getZ(), 2, color);
+        p1.add(vector.subtract(new Vector(0, gravity, 0)));
 
-        player.getWorld().spawnParticle(Particle.valueOf(SpellData.PARTICLE.getValue()), p1.getX(), p1.getY(), p1.getZ(), 2, SpellData.PARTICLECOLOR.value);
-        p1.add(vector.subtract(new Vector(0, Double.parseDouble(SpellData.GRAVITY.getValue()), 0)));
+        if(player.getWorld().getBlockAt(p1.toLocation(player.getWorld())).getType().isSolid()){
+
+            return p1.toLocation(player.getWorld());
+
+        }
+
         return null;
     }
     }
