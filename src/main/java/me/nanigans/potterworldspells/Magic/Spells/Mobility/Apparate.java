@@ -45,7 +45,6 @@ public class Apparate extends Mobility {
     }
 
     protected void onHit(Location hit){
-        System.out.println(hit);
         new BukkitRunnable() {
             @Override
             public void run() {
