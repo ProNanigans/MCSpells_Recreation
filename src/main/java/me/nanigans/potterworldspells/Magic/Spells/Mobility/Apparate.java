@@ -1,4 +1,5 @@
 package me.nanigans.potterworldspells.Magic.Spells.Mobility;
+
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Mobility;
 import me.nanigans.potterworldspells.Magic.Wand;
 import org.bukkit.Color;
@@ -7,12 +8,16 @@ import org.bukkit.Particle;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 public class Apparate extends Mobility {
 
     enum SpellData{
-        SPEED(1L),
-        GRAVITY(0.0),
-        DISTANCE(25),
+        SPEED(0L),
+        GRAVITY(0D),
+        DISTANCE(25D),
         SPACING(0.5),
         PARTICLECOLOR(new Particle.DustOptions(
                 Color.AQUA, 1f
@@ -30,45 +35,34 @@ public class Apparate extends Mobility {
     }
 
 
-
     public Apparate(Wand wand) {
         super(wand);
-        player.playSound(player.getLocation(), "magic.apparate", 1, 1);
-        this.cast();
+        player.getWorld().playSound(player.getLocation(), "magic.apparate", 1, 1);
+
+        super.cast(Double.parseDouble(SpellData.DISTANCE.getValue()), Double.parseDouble(SpellData.SPACING.getValue()),
+                Long.parseLong(SpellData.SPEED.getValue()), this::whileFiring, this::onHit);
+
     }
 
-    @Override
-    protected void cast(){
-        double length = Double.parseDouble(SpellData.DISTANCE.value.toString());
-        Location p2 = player.getLocation().add(player.getLocation().getDirection().multiply(length));
-        double distance = getSpellCastLoc().distance(p2);
-        Vector p1 = getSpellCastLoc().toVector();
-        final double spacing = Double.parseDouble(SpellData.SPACING.getValue());
-        Vector vector = p2.toVector().clone().subtract(p1).normalize().multiply(spacing);
-
+    protected void onHit(Location hit){
+        System.out.println(hit);
         new BukkitRunnable() {
-            final long speed = Long.parseLong(SpellData.SPEED.value.toString());
             @Override
             public void run() {
+                final Location location = new Location(player.getWorld(), hit.getX(), hit.getY(), hit.getZ(), player.getLocation().getYaw(), player.getLocation().getPitch());
+                player.teleport(location);
+                player.getWorld().playSound(player.getLocation(), "magic.apparate", 1, 1);
 
-                for(double len = 0; len < distance; len += spacing) {
-
-                    if (speed > 0) {
-                        try {
-                            Thread.sleep(speed);
-
-                            player.getWorld().spawnParticle(Particle.valueOf(SpellData.PARTICLE.getValue()), p1.getX(), p1.getY(), p1.getZ(), 2, SpellData.PARTICLECOLOR.value);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        p1.add(vector.subtract(new Vector(0, Double.parseDouble(SpellData.GRAVITY.getValue()), 0)));
-                    }
-
-                }
             }
-        }.runTaskAsynchronously(plugin);
-
+        }.runTask(plugin);
     }
 
-}
+    protected Location whileFiring(Vector p1, Vector vector){
+
+        player.getWorld().spawnParticle(Particle.valueOf(SpellData.PARTICLE.getValue()), p1.getX(), p1.getY(), p1.getZ(), 2, SpellData.PARTICLECOLOR.value);
+        p1.add(vector.subtract(new Vector(0, Double.parseDouble(SpellData.GRAVITY.getValue()), 0)));
+        return null;
+    }
+    }
+
+

@@ -7,9 +7,4 @@ abstract public class Mobility extends Spell{
         super(wand);
     }
 
-    @Override
-    protected void cast() {
-
-    }
-
 }

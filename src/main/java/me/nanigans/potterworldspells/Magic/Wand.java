@@ -128,9 +128,9 @@ public class Wand implements Listener {
                 player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage));
                 saveWandInventory();
                 clearAllNotWand();
+                inWand.remove(player.getUniqueId());
                 loadInventory();
                 HandlerList.unregisterAll(this);
-                inWand.remove(player.getUniqueId());
             }catch(AssertionError err){
                 err.printStackTrace();
             }
@@ -149,7 +149,7 @@ public class Wand implements Listener {
 
                 loadPlayerSpells(file);
 
-            } else {// we need to create the first inventory
+            } else {
                 setUpInventory();
             }
         }else{
