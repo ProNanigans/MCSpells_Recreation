@@ -62,7 +62,10 @@ public class Wand implements Listener {
     }
 
 
-
+    /**
+     * Event for swapping inventory
+     * @param event InventoryCLickEvent
+     */
     @EventHandler
     public void swapInventories(InventoryClickEvent event){
 
@@ -70,6 +73,10 @@ public class Wand implements Listener {
 
     }
 
+    /**
+     * Handles wand inventory clicks
+     * @param event InventoryClickEvent
+     */
     @EventHandler
     private void wandClick(InventoryClickEvent event){
 
