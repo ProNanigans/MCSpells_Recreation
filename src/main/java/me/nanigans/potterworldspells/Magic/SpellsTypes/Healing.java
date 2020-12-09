@@ -1,4 +1,4 @@
 package me.nanigans.potterworldspells.Magic.SpellsTypes;
 
-abstract class Healing extends Spell{
+abstract cpublic lass Healing extends Spell{
 }

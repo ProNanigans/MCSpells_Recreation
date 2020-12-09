@@ -1,4 +1,4 @@
 package me.nanigans.potterworldspells.Magic.SpellsTypes;
 
-abstract class Utility extends Spell{
+abstract public class Utility extends Spell{
 }

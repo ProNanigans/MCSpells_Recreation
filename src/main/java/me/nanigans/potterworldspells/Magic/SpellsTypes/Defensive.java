@@ -1,4 +1,4 @@
 package me.nanigans.potterworldspells.Magic.SpellsTypes;
 
-abstract class Defensive extends Spell{
+abstract public class Defensive extends Spell{
 }

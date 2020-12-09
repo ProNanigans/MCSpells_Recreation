@@ -6,8 +6,8 @@ abstract public class Spell {
     protected long cooldDown;
     protected Wand wand;
 
-    public Spell(Wand wand, String spellToCast){
-
+    public Spell(Wand wand){
+        this.wand = wand;
     }
 
     abstract protected void cast();
@@ -15,5 +15,10 @@ abstract public class Spell {
     protected void runCooldown(){
 
     }
+
+    protected void removeCooldown(){
+
+    }
+
 
 }

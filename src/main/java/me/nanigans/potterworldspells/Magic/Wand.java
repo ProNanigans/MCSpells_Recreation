@@ -8,6 +8,7 @@ import me.nanigans.potterworldspells.Utils.Config.YamlPaths;
 import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.ItemUtils;
 import me.nanigans.potterworldspells.Utils.Spells;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -16,10 +17,12 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class Wand implements Listener {
@@ -30,6 +33,7 @@ public class Wand implements Listener {
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
     private List<Spell> activeSpells = new ArrayList<>();
+    private double mana = 100;
 
     public Wand(Player player){
         this.player = player;
@@ -55,6 +59,58 @@ public class Wand implements Listener {
         }
     }
 
+    /**
+     * When a player wants to cast a spell, this method will call the spell class and invoke its constructor
+     * @param event PlayerInteractEvent for when a player left clicks
+     * @throws ClassNotFoundException if the spell is unknown and is not registered as a created class
+     * @throws NoSuchMethodException when the constructor isn't found
+     * @throws IllegalAccessException when we cant access the constructor
+     * @throws InvocationTargetException error
+     * @throws InstantiationException error
+     */
+    @EventHandler
+    public void leftClick(PlayerInteractEvent event) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())){
+
+            if(event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_AIR){
+                if(ItemUtils.hasNBT(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
+
+                    String spell = ItemUtils.getNBT(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
+                    String spellType = ItemUtils.getNBT(wand, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
+                    final Class<?> aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells."+spellType+"."+spell);
+                    aClass.getConstructor(Wand.class).newInstance(this);
+
+                }
+
+            }
+
+        }
+    }
+
+    /**
+     * For when a player swaps to a different item in their hotbar, we tell the wand that its current primed
+     * spell is that spell that was just switched to. Then the event cancels
+     * @param event PlayerItemHeldEvent for when a player swaps hotbar slots
+     */
+    @EventHandler
+    public void swapSpellInHotBar(PlayerItemHeldEvent event){
+        event.setCancelled(true);
+        ItemStack itemSwappedTo = player.getInventory().getItem(event.getNewSlot());
+        if(ItemUtils.hasNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())){
+
+            String spellName = ItemUtils.getNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString();
+            final ItemMeta meta = wand.getItemMeta();
+            meta.setDisplayName(ChatColor.GOLD+spellName+" "+ChatColor.DARK_GRAY+"("+ChatColor.DARK_AQUA+"Wand"+
+                    ChatColor.DARK_GRAY+")");
+            wand.setItemMeta(meta);
+            ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
+                    ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
+
+            player.getInventory().getItemInMainHand().setItemMeta(meta);
+            player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), spellName));
+
+        }
+    }
 
     /**
      * Closes the current wand object. First it saves the wand inventory, then it clears the inventory except the wand
@@ -176,6 +232,9 @@ public class Wand implements Listener {
             itemMeta.setDisplayName(values[i].getName());
             itemMeta.setCustomModelData(values[i].getData());
             item.setItemMeta(itemMeta);
+            ItemUtils.setData(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), values[i].getName());
+            ItemUtils.setData(item, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType(), values[i].getSpellType());
+
             spellPlacement.put(i, item);
         }
         inventorySpellPlacement.put(String.valueOf(invNum), spellPlacement);
@@ -216,6 +275,14 @@ public class Wand implements Listener {
             }
         }
 
+    }
+
+    public double getMana() {
+        return mana;
+    }
+
+    public void setMana(double mana) {
+        this.mana = mana;
     }
 
     public List<Spell> getActiveSpells() {

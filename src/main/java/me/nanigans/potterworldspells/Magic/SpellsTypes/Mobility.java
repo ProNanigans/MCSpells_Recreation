@@ -1,4 +1,15 @@
 package me.nanigans.potterworldspells.Magic.SpellsTypes;
 
-abstract class Mobility extends Spell{
+import me.nanigans.potterworldspells.Magic.Wand;
+
+abstract public class Mobility extends Spell{
+    public Mobility(Wand wand) {
+        super(wand);
+    }
+
+    @Override
+    protected void cast() {
+
+    }
+
 }

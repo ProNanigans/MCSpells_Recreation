@@ -1,4 +1,4 @@
 package me.nanigans.potterworldspells.Magic.SpellsTypes;
 
-abstract class Cosmetic extends Spell{
+abstract public class Cosmetic extends Spell{
 }
