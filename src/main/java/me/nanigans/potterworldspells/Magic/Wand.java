@@ -11,9 +11,9 @@ import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -33,38 +33,54 @@ public class Wand implements Listener {
     private final Player player;
     private ItemStack wand;
     private int wandPage = 1;
-    private short hotbarPage = 1;
+    private int hotbarPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
     private List<Spell> activeSpells = new ArrayList<>();
     private double mana = 100;
     private ItemStack lastSpell;
+    public final static short maxHotBarPages = 2;
+    public final static int maxInventoryPages = 3;
+    private boolean canCastSpells = true;
 
 
     public Wand(Player player){
         this.player = player;
         this.wand = player.getInventory().getItemInMainHand();
         inWand.put(player.getUniqueId(), this);
-        ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
         if(ItemUtils.hasNBT(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType())){
             this.wandPage = (int) ItemUtils.getNBT(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType());
         }
         if(ItemUtils.hasNBT(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType())){
-            this.hotbarPage = (short) ItemUtils.getNBT(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType());
+            this.hotbarPage = (int) ItemUtils.getNBT(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType());
         }
 
     }
 
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void swapHotBar(PlayerDropItemEvent event){
 
-        if(event.getItemDrop().getItemStack().equals(this.wand) && Objects.equals(event.getItemDrop().getOwner(), this.player.getUniqueId())){
+        if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())){
+            canCastSpells = false;
+            event.setCancelled(true);
 
+            if(inWandInv(player)) {
+                saveWandHotbar();
+                if (hotbarPage + 1 > maxHotBarPages)
+                    hotbarPage = 1;
+                else hotbarPage++;
 
-
+                clearHotBar();
+                loadHotbar(new File(FilePaths.USERS.getPath() + "/" + player.getUniqueId() + ".yml"));
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        canCastSpells = true;
+                    }
+                }.runTaskLater(plugin, 0);
+            }
         }
 
     }
@@ -92,10 +108,9 @@ public class Wand implements Listener {
      * @throws InvocationTargetException error
      * @throws InstantiationException error
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void leftClick(PlayerInteractEvent event) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())){
-
+        if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId()) && canCastSpells){
             if(event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_AIR){
                 if(ItemUtils.hasNBT(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
 
@@ -120,24 +135,30 @@ public class Wand implements Listener {
     public void swapSpellInHotBar(PlayerItemHeldEvent event){
         if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())) {
             event.setCancelled(true);
+            this.wand = player.getInventory().getItemInMainHand();
             ItemStack itemSwappedTo = player.getInventory().getItem(event.getNewSlot());
-            if (ItemUtils.hasNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
+            if (itemSwappedTo != null && !itemSwappedTo.equals(this.wand)) {
 
-                String spellName = ItemUtils.getNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString();
-                final ItemMeta meta = wand.getItemMeta();
-                meta.setDisplayName(ChatColor.GOLD + spellName + " " + ChatColor.DARK_GRAY + "(" + ChatColor.DARK_AQUA + "Wand" +
-                        ChatColor.DARK_GRAY + ")");
-                wand.setItemMeta(meta);
-                if(ItemUtils.hasNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType())) {
-                    ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
-                            ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
+                if (ItemUtils.hasNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
+
+                    String spellName = ItemUtils.getNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString();
+                    final ItemMeta meta = wand.getItemMeta();
+                    meta.setDisplayName(ChatColor.GOLD + spellName + " " + ChatColor.DARK_GRAY + "(" + ChatColor.DARK_AQUA + "Wand" +
+                            ChatColor.DARK_GRAY + ")");
+                    wand.setItemMeta(meta);
+                    if (ItemUtils.hasNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType())) {
+                        ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
+                                ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
+                    }
+                    lastSpell = itemSwappedTo;
+                    final ItemStack wandStack = ItemUtils.setData(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), spellName.replace(" ", "_"));
+                    if(wandStack != null && wandStack.getType() != Material.AIR)
+                    player.getInventory().setItemInMainHand(wandStack);
+                    player.updateInventory();
+
                 }
-                lastSpell = itemSwappedTo;
-
-                player.getInventory().getItemInMainHand().setItemMeta(meta);
-                player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), spellName));
-
             }
+
         }
     }
 
@@ -150,10 +171,9 @@ public class Wand implements Listener {
         if(inWand.containsKey(player.getUniqueId())){
 
             try {
-                player.getInventory().setItemInMainHand(
-                        ItemUtils.setData(ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage),
-                                Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType(), this.hotbarPage)
-                );
+                this.wand = player.getInventory().getItemInMainHand();
+                ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage);
+                player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType(), this.hotbarPage));
                 saveWandInventory();
                 saveWandHotbar();
                 inWand.remove(player.getUniqueId());
@@ -175,16 +195,18 @@ public class Wand implements Listener {
         File file = new File(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
         if(inWand.containsKey(player.getUniqueId())) {
             if (file.exists()) {
+                ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
 
                 loadPlayerSpells(file);
 
             } else {
+                ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
                 setUpInventory();
             }
         }else{
 
             if(file.exists()){
-
+                ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
                 loadPlayerItems(file);
 
             }
@@ -200,36 +222,55 @@ public class Wand implements Listener {
      */
 
     private void loadPlayerSpells(File fromFile){
+        clearAllNotWand();
+        loadSpellInventory(fromFile);
+        loadHotbar(fromFile);
+    }
 
+    /**
+     * Loads a players inventory from the current page
+     * @param fromFile the yaml file to the inventory from
+     * @requires fromFile to exist and to be a yaml file
+     */
+    private void loadSpellInventory(File fromFile) {
         YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
         final FileConfiguration data = yaml.getData();
-
-        final Map<String, Object> spells =
+        Map<String, Object> spells =
                 YamlGenerator.getConfigSectionValue(data.get(YamlPaths.INVENTORIES.getPath()+"."+wandPage), true);
-        clearAllNotWand();
-        if(spells != null && spells.size() > 0) {
+        spells = spells == null ? new HashMap<>() : spells;
+
+        if (spells.size() > 0) {
             spells.forEach((i, j) -> {
                 int pos = Integer.parseInt(i);
                 player.getInventory().setItem(pos, (ItemStack) j);
             });
 
-            final Map<String, Object> hotbar = YamlGenerator.getConfigSectionValue(data.get(YamlPaths.HOTBARS.getPath() + "." + hotbarPage), true);
-            if(hotbar != null && hotbar.size() > 0){
-                hotbar.forEach((i, j) -> {
-                    int pos = Integer.parseInt(i);
-                    if(pos < 9){
-                        int handPos = player.getInventory().getHeldItemSlot();
-                        if(pos == handPos)
-                            pos = player.getInventory().firstEmpty();
-                    }
-                    player.getInventory().setItem(pos, (ItemStack) j);
-                });
-            }
-
-        }else{
-            setUpInventory();
         }
+    }
 
+    /**
+     * Loads a players hotbar from the current page
+     * @param fromFile the yaml file to get the hotbar from
+     * @requires fromFile to exist and to be a yaml file
+     */
+    private void loadHotbar(File fromFile){
+
+        YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
+        final FileConfiguration data = yaml.getData();
+
+        Map<String, Object> hotbar = YamlGenerator.getConfigSectionValue(data.get(YamlPaths.HOTBARS.getPath()+"."+hotbarPage), true);
+        hotbar = hotbar == null ? new HashMap<>() : hotbar;
+        if(hotbar.size() > 0){
+            hotbar.forEach((i, j) -> {
+                int pos = Integer.parseInt(i);
+                if(pos < 9){
+                    int handPos = player.getInventory().getHeldItemSlot();
+                    if(pos == handPos)
+                        pos = player.getInventory().firstEmpty();
+                }
+                player.getInventory().setItem(pos, (ItemStack) j);
+            });
+        }
     }
 
     /**
@@ -244,7 +285,7 @@ public class Wand implements Listener {
         final Map<String, Object> playerItems = YamlGenerator.getConfigSectionValue(data
                 .get(YamlPaths.INVENTORY.getPath()), true);
         clearAllNotWand();
-        if(playerItems != null){
+        if(playerItems != null && playerItems.size() > 0){
             playerItems.forEach((i, j) -> player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j));
         }
 
@@ -255,8 +296,6 @@ public class Wand implements Listener {
      * modifying the wand
      */
     private void setUpInventory(){
-
-        ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
 
         final Spells[] values = Spells.values();
         Map<String, Map<Integer, ItemStack>> inventorySpellPlacement = new HashMap<>();
@@ -273,11 +312,12 @@ public class Wand implements Listener {
             itemMeta.setDisplayName(values[i].getName());
             itemMeta.setCustomModelData(values[i].getData());
             item.setItemMeta(itemMeta);
-            ItemUtils.setData(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), values[i].getName());
-            ItemUtils.setData(item, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType(), values[i].getSpellType());
+            ItemUtils.setData(ItemUtils.setData(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), values[i].getName()),
+                    Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType(), values[i].getSpellType());
 
             spellPlacement.put(i, item);
         }
+        System.out.println("inventorySpellPlacement = " + inventorySpellPlacement);
         inventorySpellPlacement.put(String.valueOf(invNum), spellPlacement);
         clearAllNotWand();
         inventorySpellPlacement.get(String.valueOf(wandPage)).forEach((i, j) -> player.getInventory().addItem(j));
@@ -325,14 +365,36 @@ public class Wand implements Listener {
      */
     private void clearAllNotWand(){
 
-        for(ItemStack item : player.getInventory().getStorageContents()) {
-            if (item != null) {
-                if (!item.isSimilar(this.wand)) {
-                    player.getInventory().removeItem(item);
-                }
+        final ItemStack[] storageContents = player.getInventory().getStorageContents();
+        for (ItemStack storageContent : storageContents) {
+            if (storageContent != null && !storageContent.isSimilar(this.wand)) {
+                if (!storageContent.isSimilar(player.getInventory().getItemInMainHand()))
+                    player.getInventory().removeItem(storageContent);
             }
         }
+    }
 
+    /**
+     * Will clear the players hotbar except for the wand
+     */
+    private void clearHotBar(){
+        for (int i = 0; i < 9; i++) {
+            final ItemStack item = player.getInventory().getStorageContents()[i];
+            if(item != null && !item.isSimilar(this.wand))
+                player.getInventory().removeItem(item);
+        }
+    }
+
+    /**
+     * will clear the players inventory except for the wand although the wand can't be inside the inventory when open
+     */
+    private void clearInventory(){
+        for(int i = 9; i < player.getInventory().getStorageContents().length; i++){
+            final ItemStack item = player.getInventory().getStorageContents()[i];
+            if(item != null && !item.isSimilar(this.wand)){
+                player.getInventory().removeItem(item);
+            }
+        }
     }
 
     public ItemStack getLastSpell() {

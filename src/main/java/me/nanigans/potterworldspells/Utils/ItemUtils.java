@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ItemUtils {
-    private static PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
+    private static final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
 
     public static <T, Z> ItemStack setData(ItemStack itemStack, String key, PersistentDataType<T, Z> type, Z value){
         NamespacedKey keyy = new NamespacedKey(plugin, key);
