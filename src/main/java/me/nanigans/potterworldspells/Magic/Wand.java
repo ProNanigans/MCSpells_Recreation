@@ -17,6 +17,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -55,6 +59,33 @@ public class Wand implements Listener {
         }
         if(ItemUtils.hasNBT(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType())){
             this.hotbarPage = (int) ItemUtils.getNBT(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType());
+        }
+
+    }
+
+
+    @EventHandler
+    public void swapInventories(InventoryClickEvent event){
+        Player clicked = ((Player) event.getWhoClicked());
+        if(clicked.getUniqueId().equals(this.player.getUniqueId()) && inWandInv(clicked)){
+
+            if(event.getClickedInventory() == null){
+
+                ClickType click = event.getClick();
+                if(click.isLeftClick()){
+                    if(this.wandPage+1 > maxInventoryPages)
+                        this.wandPage = 1;
+                    else this.wandPage++;
+                }else if(click.isRightClick()){
+                    if(this.wandPage - 1 == 0)
+                        this.wandPage = maxInventoryPages;
+                    else this.wandPage--;
+                }
+                clearInventory();
+                loadSpellInventory(new File(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml"));
+
+            }
+
         }
 
     }
