@@ -4,6 +4,7 @@ import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.PotterWorldSpells;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -11,15 +12,17 @@ import org.bukkit.util.Vector;
 import java.util.function.Consumer;
 
 abstract public class Spell {
-    protected long cooldDown;
+    protected double cooldDown = 0D;
     protected Wand wand;
     protected Player player;
     protected PotterWorldSpells plugin;
+    protected ItemStack spell;
 
     public Spell(Wand wand){
         this.wand = wand;
         this.player = wand.getPlayer();
         this.plugin = wand.getPlugin();
+        this.spell = wand.getLastSpell();
     }
 
     /**
@@ -68,7 +71,9 @@ abstract public class Spell {
         Location call(Vector p1, Vector vector);
     }
 
-    protected void runCooldown(){
+    protected void addCooldown(Spell spell){
+
+        //TODO after hotbar and inventory switching
 
     }
 

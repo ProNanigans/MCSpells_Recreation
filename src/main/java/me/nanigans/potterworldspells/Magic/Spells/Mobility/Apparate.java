@@ -16,6 +16,7 @@ public class Apparate extends Mobility {
     private double gravity = 0;
     private double distance = 25D;
     private double spacing = 0.5;
+    protected long cooldown = 5000;
     private Particle.DustOptions color = new Particle.DustOptions(
         Color.AQUA, 1f
     );
@@ -23,6 +24,7 @@ public class Apparate extends Mobility {
 
     public Apparate(Wand wand) {
         super(wand);
+        super.cooldDown = cooldown;
 
         AnimatedBallEffect ball = new AnimatedBallEffect(plugin.manager);
         ball.color = color.getColor();

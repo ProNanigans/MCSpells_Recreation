@@ -11,15 +11,18 @@ import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -30,10 +33,13 @@ public class Wand implements Listener {
     private final Player player;
     private ItemStack wand;
     private int wandPage = 1;
+    private short hotbarPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
     private List<Spell> activeSpells = new ArrayList<>();
     private double mana = 100;
+    private ItemStack lastSpell;
+
 
     public Wand(Player player){
         this.player = player;
@@ -42,8 +48,26 @@ public class Wand implements Listener {
         ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
+        if(ItemUtils.hasNBT(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType())){
+            this.wandPage = (int) ItemUtils.getNBT(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType());
+        }
+        if(ItemUtils.hasNBT(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType())){
+            this.hotbarPage = (short) ItemUtils.getNBT(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType());
+        }
+
     }
 
+
+    @EventHandler
+    public void swapHotBar(PlayerDropItemEvent event){
+
+        if(event.getItemDrop().getItemStack().equals(this.wand) && Objects.equals(event.getItemDrop().getOwner(), this.player.getUniqueId())){
+
+
+
+        }
+
+    }
 
     /**
      * Handles the right click event for when a player wants to close their wand inventory
@@ -108,6 +132,7 @@ public class Wand implements Listener {
                     ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
                             ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
                 }
+                lastSpell = itemSwappedTo;
 
                 player.getInventory().getItemInMainHand().setItemMeta(meta);
                 player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), spellName));
@@ -125,10 +150,14 @@ public class Wand implements Listener {
         if(inWand.containsKey(player.getUniqueId())){
 
             try {
-                player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage));
+                player.getInventory().setItemInMainHand(
+                        ItemUtils.setData(ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage),
+                                Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType(), this.hotbarPage)
+                );
                 saveWandInventory();
-                clearAllNotWand();
+                saveWandHotbar();
                 inWand.remove(player.getUniqueId());
+                clearAllNotWand();
                 loadInventory();
                 HandlerList.unregisterAll(this);
             }catch(AssertionError err){
@@ -176,19 +205,27 @@ public class Wand implements Listener {
         final FileConfiguration data = yaml.getData();
 
         final Map<String, Object> spells =
-                YamlGenerator.getConfigSectionValue(data.get(YamlPaths.SPELL_INVENTORY.getPath()+"."+wandPage), true);
-        if(spells != null) {
-            clearAllNotWand();
-
-            spells.forEach((i, j) ->{
+                YamlGenerator.getConfigSectionValue(data.get(YamlPaths.INVENTORIES.getPath()+"."+wandPage), true);
+        clearAllNotWand();
+        if(spells != null && spells.size() > 0) {
+            spells.forEach((i, j) -> {
                 int pos = Integer.parseInt(i);
-                if(pos < 9){
-                    int handPos = player.getInventory().getHeldItemSlot();
-                    if(pos == handPos)
-                        pos = player.getInventory().firstEmpty();
-                }
                 player.getInventory().setItem(pos, (ItemStack) j);
             });
+
+            final Map<String, Object> hotbar = YamlGenerator.getConfigSectionValue(data.get(YamlPaths.HOTBARS.getPath() + "." + hotbarPage), true);
+            if(hotbar != null && hotbar.size() > 0){
+                hotbar.forEach((i, j) -> {
+                    int pos = Integer.parseInt(i);
+                    if(pos < 9){
+                        int handPos = player.getInventory().getHeldItemSlot();
+                        if(pos == handPos)
+                            pos = player.getInventory().firstEmpty();
+                    }
+                    player.getInventory().setItem(pos, (ItemStack) j);
+                });
+            }
+
         }else{
             setUpInventory();
         }
@@ -254,16 +291,33 @@ public class Wand implements Listener {
 
         ItemStack[] items = player.getInventory().getStorageContents();
         Map<Integer, ItemStack> itemStackMap = new HashMap<>();
-        for(int i = 0; i < items.length; i++){
-            if(items[i] != null && !items[i].equals(wand))
+        for(int i = 9; i < items.length; i++){
+            if(items[i] != null && !items[i].equals(wand)) {
                 itemStackMap.put(i, items[i]);
+            }
         }
 
         YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
         final FileConfiguration data = yaml.getData();
-        data.set(YamlPaths.SPELL_INVENTORY.getPath()+"."+wandPage, itemStackMap);
+        data.set(YamlPaths.INVENTORIES.getPath()+"."+wandPage, itemStackMap);
 
         yaml.save();
+    }
+
+    private void saveWandHotbar(){
+
+        ItemStack[] items = player.getInventory().getStorageContents();
+        Map<Integer, ItemStack> itemStackMap = new HashMap<>();
+        for(int i = 0; i < 9; i++){
+            if(items[i] != null && !items[i].equals(wand)){
+                itemStackMap.put(i, items[i]);
+            }
+        }
+        YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
+        final FileConfiguration data = yaml.getData();
+        data.set(YamlPaths.HOTBARS.getPath()+"."+hotbarPage, itemStackMap);
+        yaml.save();
+
     }
 
     /**
@@ -279,6 +333,10 @@ public class Wand implements Listener {
             }
         }
 
+    }
+
+    public ItemStack getLastSpell() {
+        return lastSpell;
     }
 
     public PotterWorldSpells getPlugin() {

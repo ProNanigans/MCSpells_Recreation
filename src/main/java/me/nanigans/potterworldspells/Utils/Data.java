@@ -6,6 +6,7 @@ public enum Data {
 
     ISWAND("IsWand", PersistentDataType.BYTE),
     PAGENUM("Page", PersistentDataType.INTEGER),
+    HOTBARNUM("Hotbar_Num", PersistentDataType.SHORT),
     SPELLTYPE("SpellType", PersistentDataType.STRING),
     SPELLNAME("SpellName", PersistentDataType.STRING);
 
