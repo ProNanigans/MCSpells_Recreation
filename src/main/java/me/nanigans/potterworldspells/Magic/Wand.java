@@ -94,21 +94,23 @@ public class Wand implements Listener {
      */
     @EventHandler
     public void swapSpellInHotBar(PlayerItemHeldEvent event){
-        event.setCancelled(true);
-        ItemStack itemSwappedTo = player.getInventory().getItem(event.getNewSlot());
-        if(ItemUtils.hasNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())){
+        if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())) {
+            event.setCancelled(true);
+            ItemStack itemSwappedTo = player.getInventory().getItem(event.getNewSlot());
+            if (ItemUtils.hasNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
 
-            String spellName = ItemUtils.getNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString();
-            final ItemMeta meta = wand.getItemMeta();
-            meta.setDisplayName(ChatColor.GOLD+spellName+" "+ChatColor.DARK_GRAY+"("+ChatColor.DARK_AQUA+"Wand"+
-                    ChatColor.DARK_GRAY+")");
-            wand.setItemMeta(meta);
-            ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
-                    ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
+                String spellName = ItemUtils.getNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString();
+                final ItemMeta meta = wand.getItemMeta();
+                meta.setDisplayName(ChatColor.GOLD + spellName + " " + ChatColor.DARK_GRAY + "(" + ChatColor.DARK_AQUA + "Wand" +
+                        ChatColor.DARK_GRAY + ")");
+                wand.setItemMeta(meta);
+                ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
+                        ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
 
-            player.getInventory().getItemInMainHand().setItemMeta(meta);
-            player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), spellName));
+                player.getInventory().getItemInMainHand().setItemMeta(meta);
+                player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), spellName));
 
+            }
         }
     }
 
