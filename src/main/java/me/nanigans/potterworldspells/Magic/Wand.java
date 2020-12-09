@@ -19,8 +19,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCreativeEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -50,7 +48,7 @@ public class Wand implements Listener {
 
     public Wand(Player player){
         this.player = player;
-        this.wand = player.getInventory().getItemInMainHand();
+        this.wand = player.getInventory().getItemInMainHand().clone();
         inWand.put(player.getUniqueId(), this);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
@@ -64,13 +62,42 @@ public class Wand implements Listener {
     }
 
 
+
     @EventHandler
     public void swapInventories(InventoryClickEvent event){
+
+        swapInventory(event);
+
+    }
+
+    @EventHandler
+    private void wandClick(InventoryClickEvent event){
+
+        swapInventory(event);
+        Player clicked = ((Player) event.getWhoClicked());
+        if(clicked.getUniqueId().equals(this.player.getUniqueId())){
+
+            if(event.getCurrentItem() != null && event.getCurrentItem().equals(this.wand)){
+                swapHotbar(event.getClick());
+                event.setCancelled(true);
+
+            }
+
+        }
+
+    }
+
+    /**
+     * WHen the player clicks outside the inventory, we swap their inventory to the next page
+     * @param event InventoryClickEvent
+     */
+    private void swapInventory(InventoryClickEvent event){
+
         Player clicked = ((Player) event.getWhoClicked());
         if(clicked.getUniqueId().equals(this.player.getUniqueId()) && inWandInv(clicked)){
 
             if(event.getClickedInventory() == null){
-
+                saveWandInventory();
                 ClickType click = event.getClick();
                 if(click.isLeftClick()){
                     if(this.wandPage+1 > maxInventoryPages)
@@ -90,28 +117,46 @@ public class Wand implements Listener {
 
     }
 
+    /**
+     * Handles inventory drops
+     * @param event PlayerDropItemEvent
+     */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void swapHotBar(PlayerDropItemEvent event){
+    public void itemDrop(PlayerDropItemEvent event){
 
         if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())){
             canCastSpells = false;
             event.setCancelled(true);
+            swapHotbar(ClickType.RIGHT);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    canCastSpells = true;
+                }
+            }.runTaskLater(plugin, 0);
+        }
 
-            if(inWandInv(player)) {
-                saveWandHotbar();
+    }
+
+    /**
+     * When the player wants to swap hotbars, it'll swap them to the next one
+     */
+    public void swapHotbar(ClickType type){
+
+        if(inWandInv(player)) {
+            saveWandHotbar();
+            if(type.isLeftClick()) {
                 if (hotbarPage + 1 > maxHotBarPages)
                     hotbarPage = 1;
                 else hotbarPage++;
-
-                clearHotBar();
-                loadHotbar(new File(FilePaths.USERS.getPath() + "/" + player.getUniqueId() + ".yml"));
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        canCastSpells = true;
-                    }
-                }.runTaskLater(plugin, 0);
+            }else if(type.isRightClick()){
+                if(hotbarPage - 1 == 0)
+                    hotbarPage = maxHotBarPages;
+                else hotbarPage--;
             }
+            clearHotBar();
+            loadHotbar(new File(FilePaths.USERS.getPath() + "/" + player.getUniqueId() + ".yml"));
+
         }
 
     }
@@ -166,7 +211,6 @@ public class Wand implements Listener {
     public void swapSpellInHotBar(PlayerItemHeldEvent event){
         if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())) {
             event.setCancelled(true);
-            this.wand = player.getInventory().getItemInMainHand();
             ItemStack itemSwappedTo = player.getInventory().getItem(event.getNewSlot());
             if (itemSwappedTo != null && !itemSwappedTo.equals(this.wand)) {
 
@@ -202,7 +246,6 @@ public class Wand implements Listener {
         if(inWand.containsKey(player.getUniqueId())){
 
             try {
-                this.wand = player.getInventory().getItemInMainHand();
                 ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage);
                 player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType(), this.hotbarPage));
                 saveWandInventory();
@@ -348,7 +391,6 @@ public class Wand implements Listener {
 
             spellPlacement.put(i, item);
         }
-        System.out.println("inventorySpellPlacement = " + inventorySpellPlacement);
         inventorySpellPlacement.put(String.valueOf(invNum), spellPlacement);
         clearAllNotWand();
         inventorySpellPlacement.get(String.valueOf(wandPage)).forEach((i, j) -> player.getInventory().addItem(j));
