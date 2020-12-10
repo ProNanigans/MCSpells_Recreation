@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -39,7 +40,7 @@ public class Wand implements Listener {
     private int hotbarPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
-    private List<Spell> activeSpells = new ArrayList<>();
+    private List<BukkitTask> activeSpells = new ArrayList<>();
     private double mana = 100;
     private ItemStack lastSpell;
     public final static short maxHotBarPages = 2;
@@ -332,6 +333,8 @@ public class Wand implements Listener {
 
             if(file.exists()){
                 ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
+                this.activeSpells.forEach(BukkitTask::cancel);
+                this.activeSpells.clear();
                 loadPlayerItems(file);
 
             }
@@ -368,6 +371,7 @@ public class Wand implements Listener {
             spells.forEach((i, j) -> {
                 int pos = Integer.parseInt(i);
                 player.getInventory().setItem(pos, (ItemStack) j);
+                Spell.reloadCooldown((ItemStack) j, this, plugin);
             });
 
         }
@@ -398,6 +402,7 @@ public class Wand implements Listener {
                     }
                 }
                 player.getInventory().setItem(pos, (ItemStack) j);
+                Spell.reloadCooldown((ItemStack) j, this, plugin);
             });
         }
     }
@@ -567,11 +572,11 @@ public class Wand implements Listener {
         this.mana = mana;
     }
 
-    public List<Spell> getActiveSpells() {
+    public List<BukkitTask> getActiveSpells() {
         return activeSpells;
     }
 
-    public void setActiveSpells(List<Spell> activeSpells) {
+    public void setActiveSpells(List<BukkitTask> activeSpells) {
         this.activeSpells = activeSpells;
     }
 

@@ -102,11 +102,11 @@ abstract public class Spell {
 
             }
         }.runTaskTimerAsynchronously(plugin, 20, 20);
-        this.wand.getActiveSpells().add(this);
+        this.wand.getActiveSpells().add(task);
 
     }
 
-    public static void reloadCooldown(ItemStack item, PotterWorldSpells plugin) {
+    public static void reloadCooldown(ItemStack item, Wand wand, PotterWorldSpells plugin) {
 
         if (ItemUtils.hasNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
 
@@ -132,6 +132,7 @@ abstract public class Spell {
                     }
 
                 }.runTaskTimerAsynchronously(plugin, 20, 20);
+                wand.getActiveSpells().add(task);
 
             }
 
@@ -149,6 +150,8 @@ abstract public class Spell {
             this.task.cancel();
         }
     }
+
+
 
     protected Location getSpellCastLoc(){
         if(player.getMainHand() == MainHand.RIGHT)
