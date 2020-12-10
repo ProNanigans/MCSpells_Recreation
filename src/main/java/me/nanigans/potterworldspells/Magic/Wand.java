@@ -513,6 +513,9 @@ public class Wand implements Listener {
         yaml.save();
     }
 
+    /**
+     * Saves the current hotbar the player is on. Will not save the wand
+     */
     private void saveWandHotbar(){
 
         ItemStack[] items = player.getInventory().getStorageContents();
