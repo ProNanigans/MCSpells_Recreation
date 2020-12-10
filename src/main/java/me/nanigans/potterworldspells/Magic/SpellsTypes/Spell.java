@@ -2,11 +2,14 @@ package me.nanigans.potterworldspells.Magic.SpellsTypes;
 
 import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.PotterWorldSpells;
+import me.nanigans.potterworldspells.Utils.Data;
+import me.nanigans.potterworldspells.Utils.ItemUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.function.Consumer;
@@ -17,6 +20,7 @@ abstract public class Spell {
     protected Player player;
     protected PotterWorldSpells plugin;
     protected ItemStack spell;
+    protected BukkitTask task;
 
     public Spell(Wand wand){
         this.wand = wand;
@@ -71,14 +75,79 @@ abstract public class Spell {
         Location call(Vector p1, Vector vector);
     }
 
-    protected void addCooldown(Spell spell){
+    /**
+     * Adds a cooldown to the spell casted and times it per second with a runnable
+     */
+    protected void addCooldown(){
 
-        //TODO after hotbar and inventory switching
+        final ItemStack lastSpell = wand.getLastSpell();
+        lastSpell.setAmount((int)this.cooldDown);
+        long time = (long) (System.currentTimeMillis() + (this.cooldDown*1000));
+        ItemUtils.setData(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType(), time);
+
+        final Spell that = this;
+        this.task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                long time = System.currentTimeMillis();
+                long spellTime = (long) ItemUtils.getNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                if(spellTime > time){
+                    if(lastSpell.getAmount() > 1)
+                        lastSpell.setAmount(lastSpell.getAmount()-1);
+                }else{
+                    ItemUtils.removeNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                    wand.getActiveSpells().remove(that);
+                    this.cancel();
+                }
+
+            }
+        }.runTaskTimerAsynchronously(plugin, 20, 20);
+        this.wand.getActiveSpells().add(this);
 
     }
 
+    public static void reloadCooldown(ItemStack item, PotterWorldSpells plugin) {
 
+        if (ItemUtils.hasNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
+
+            long time = (long) ItemUtils.getNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+            long currentTime = System.currentTimeMillis();
+            long remainingTime = currentTime - time;
+            if (remainingTime > 0) {
+
+                int amount = (int) (currentTime - remainingTime);
+                item.setAmount(amount);
+                BukkitTask task = new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        long cTime = System.currentTimeMillis();
+                        if (time > cTime) {
+                            if (item.getAmount() > 1) {
+                                item.setAmount(0);
+                            }
+                        } else {
+                            ItemUtils.removeNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                            this.cancel();
+                        }
+                    }
+
+                }.runTaskTimerAsynchronously(plugin, 20, 20);
+
+            }
+
+        }
+    }
+
+
+    /**
+     * Removes the cooldown on a spell if it exists
+     */
     protected void removeCooldown(){
+        if(this.task != null && !this.task.isCancelled()) {
+            ItemStack lastSpell = this.wand.getLastSpell();
+            lastSpell.setAmount(1);
+            this.task.cancel();
+        }
     }
 
     protected Location getSpellCastLoc(){

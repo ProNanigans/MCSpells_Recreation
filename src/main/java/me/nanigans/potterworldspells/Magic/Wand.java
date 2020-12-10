@@ -45,6 +45,10 @@ public class Wand implements Listener {
     public final static short maxHotBarPages = 2;
     public final static int maxInventoryPages = 3;
     private boolean canCastSpells = true;
+    private final Map<String, Integer[]> spellLoc = new HashMap<String, Integer[]>(){{
+        put(Data.HOTBARNUM.toString(), new Integer[2]);
+        put(Data.PAGENUM.toString(), new Integer[2]);
+    }};
 
 
     public Wand(Player player){
@@ -71,7 +75,27 @@ public class Wand implements Listener {
     public void swapInventories(InventoryClickEvent event){
 
         swapInventory(event);
+        spellRightClicked(event);
 
+    }
+
+    /**
+     * When a player right clicks a spell, we will switch the current spell to that spell
+     * @param event InventoryClickEvent
+     */
+    private void spellRightClicked(InventoryClickEvent event){
+        if(event.getClick().isRightClick()) {
+            Player clicked = (Player) event.getWhoClicked();
+            if (clicked.getUniqueId().equals(this.player.getUniqueId())) {
+                if (event.getCurrentItem() != null && !event.getCurrentItem().equals(this.wand)) {
+                    final int position = event.getSlot();
+                    Data loc = Data.PAGENUM;
+                    if (position < 9) loc = Data.HOTBARNUM;
+                    changeSpell(event.getCurrentItem(), position, loc);
+
+                }
+            }
+        }
     }
 
     /**
@@ -224,25 +248,44 @@ public class Wand implements Listener {
 
                 if (ItemUtils.hasNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
 
-                    String spellName = ItemUtils.getNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString();
-                    final ItemMeta meta = wand.getItemMeta();
-                    meta.setDisplayName(ChatColor.GOLD + spellName + " " + ChatColor.DARK_GRAY + "(" + ChatColor.DARK_AQUA + "Wand" +
-                            ChatColor.DARK_GRAY + ")");
-                    wand.setItemMeta(meta);
-                    if (ItemUtils.hasNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType())) {
-                        ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
-                                ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
-                    }
-                    lastSpell = itemSwappedTo;
-                    final ItemStack wandStack = ItemUtils.setData(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), spellName.replace(" ", "_"));
-                    if(wandStack != null && wandStack.getType() != Material.AIR)
-                    player.getInventory().setItemInMainHand(wandStack);
-                    player.updateInventory();
+                    changeSpell(itemSwappedTo, event.getNewSlot(), Data.HOTBARNUM);
 
                 }
             }
 
         }
+    }
+
+    /**
+     * Changes the current spell bound to the wand in order for that spell to be casted
+     * @param itemSwappedTo the spell itemstack that was swapped to
+     * @param slotSwapped the location in the inventory where that was
+     * @param inventoryPosition weather or not the spell is in the inventory or the hotbar.
+     * @requires inventoryPosition to be Data.HOTBARNUM or DATA.PAGENUM
+     */
+    private void changeSpell(ItemStack itemSwappedTo, int slotSwapped, Data inventoryPosition){
+        String spellName = ItemUtils.getNBT(itemSwappedTo, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString();
+        final ItemMeta meta = wand.getItemMeta();
+        meta.setDisplayName(ChatColor.GOLD + spellName + " " + ChatColor.DARK_GRAY + "(" + ChatColor.DARK_AQUA + "Wand" +
+                ChatColor.DARK_GRAY + ")");
+
+        wand.setItemMeta(meta);
+        if (ItemUtils.hasNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType())) {
+            ItemUtils.setData(wand, Data.SPELLTYPE.toString(), Data.SPELLNAME.getType(),
+                    ItemUtils.getNBT(itemSwappedTo, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()));
+        }
+        lastSpell = itemSwappedTo;
+        final Integer[] integers = spellLoc.get(Data.HOTBARNUM.toString());
+        if(inventoryPosition == Data.HOTBARNUM)
+            integers[0] = this.hotbarPage;
+        else if(inventoryPosition == Data.PAGENUM)
+            integers[0] = this.wandPage;
+        integers[1] = slotSwapped;
+        spellLoc.put(inventoryPosition.toString(), integers);
+        final ItemStack wandStack = ItemUtils.setData(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), spellName.replace(" ", "_"));
+        if(wandStack != null && wandStack.getType() != Material.AIR)
+            player.getInventory().setItemInMainHand(wandStack);
+        player.updateInventory();
     }
 
     /**
@@ -503,6 +546,10 @@ public class Wand implements Listener {
                 player.getInventory().removeItem(item);
             }
         }
+    }
+
+    public Map<String, Integer[]> getSpellLoc() {
+        return spellLoc;
     }
 
     public ItemStack getLastSpell() {

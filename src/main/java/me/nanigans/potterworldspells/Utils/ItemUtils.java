@@ -1,9 +1,7 @@
 package me.nanigans.potterworldspells.Utils;
 
 import me.nanigans.potterworldspells.PotterWorldSpells;
-import me.nanigans.potterworldspells.Utils.Config.FilePaths;
 import me.nanigans.potterworldspells.Utils.Config.YamlGenerator;
-import me.nanigans.potterworldspells.Utils.Config.YamlPaths;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -35,6 +33,15 @@ public class ItemUtils {
     public static <T, Z> boolean hasNBT(ItemStack item, String key, PersistentDataType<T, Z> type){
         if(item.getItemMeta() == null) return false;
         return item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, key), type);
+    }
+
+
+    public static <T, Z> boolean removeNBT(ItemStack item, String key, PersistentDataType<T,Z> type){
+        if(item.getItemMeta() == null) return false;
+        if(hasNBT(item, key, type)){
+            item.getItemMeta().getPersistentDataContainer().remove(new NamespacedKey(plugin, key));
+            return true;
+        }else return false;
     }
 
     public static Inventory cloneInvContents(Inventory toClone){

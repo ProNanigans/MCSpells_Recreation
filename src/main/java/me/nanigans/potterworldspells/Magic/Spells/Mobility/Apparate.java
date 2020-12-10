@@ -4,9 +4,12 @@ import de.slikey.effectlib.effect.AnimatedBallEffect;
 import de.slikey.effectlib.util.DynamicLocation;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Mobility;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Data;
+import me.nanigans.potterworldspells.Utils.ItemUtils;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -24,21 +27,27 @@ public class Apparate extends Mobility {
 
     public Apparate(Wand wand) {
         super(wand);
-        super.cooldDown = cooldown;
 
-        AnimatedBallEffect ball = new AnimatedBallEffect(plugin.manager);
-        ball.color = color.getColor();
-        ball.setEntity(player);
-        ball.asynchronous = true;
-        ball.iterations = 20;
-        ball.yOffset = -0.32F;
-        ball.yFactor = 1.5F;
-        ball.particle = particle;
-        ball.start();
+        if(!ItemUtils.hasNBT(wand.getLastSpell(), Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
+            super.cooldDown = cooldown;
+            addCooldown();
 
-        player.getWorld().playSound(player.getLocation(), "magic.apparate", 1, 1);
+            AnimatedBallEffect ball = new AnimatedBallEffect(plugin.manager);
+            ball.color = color.getColor();
+            ball.setEntity(player);
+            ball.asynchronous = true;
+            ball.iterations = 20;
+            ball.yOffset = -0.32F;
+            ball.yFactor = 1.5F;
+            ball.particle = particle;
+            ball.start();
 
-        super.cast(distance, spacing, speed, this::whileFiring, this::onHit);
+            player.getWorld().playSound(player.getLocation(), "magic.apparate", 1, 1);
+            addCooldown();
+            super.cast(distance, spacing, speed, this::whileFiring, this::onHit);
+        }else{
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1, 1);
+        }
 
     }
 
