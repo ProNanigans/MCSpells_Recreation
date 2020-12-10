@@ -36,12 +36,13 @@ public class ItemUtils {
     }
 
 
-    public static <T, Z> boolean removeNBT(ItemStack item, String key, PersistentDataType<T,Z> type){
-        if(item.getItemMeta() == null) return false;
+    public static <T, Z> void removeNBT(ItemStack item, String key, PersistentDataType<T,Z> type){
+        if(item.getItemMeta() == null) return;
         if(hasNBT(item, key, type)){
-            item.getItemMeta().getPersistentDataContainer().remove(new NamespacedKey(plugin, key));
-            return true;
-        }else return false;
+            ItemMeta meta = item.getItemMeta().clone();
+            meta.getPersistentDataContainer().remove(new NamespacedKey(plugin, key));
+            item.setItemMeta(meta);
+        }
     }
 
     public static Inventory cloneInvContents(Inventory toClone){

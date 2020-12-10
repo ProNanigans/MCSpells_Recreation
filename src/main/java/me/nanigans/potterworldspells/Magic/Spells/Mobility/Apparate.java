@@ -19,7 +19,7 @@ public class Apparate extends Mobility {
     private double gravity = 0;
     private double distance = 25D;
     private double spacing = 0.5;
-    protected long cooldown = 5000;
+    protected double cooldown = 5;
     private Particle.DustOptions color = new Particle.DustOptions(
         Color.AQUA, 1f
     );

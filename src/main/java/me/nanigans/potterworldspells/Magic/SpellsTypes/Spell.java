@@ -89,8 +89,8 @@ abstract public class Spell {
         this.task = new BukkitRunnable() {
             @Override
             public void run() {
-                long time = System.currentTimeMillis();
-                long spellTime = (long) ItemUtils.getNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                final long spellTime = (long) ItemUtils.getNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                final long time = System.currentTimeMillis();
                 if(spellTime > time){
                     if(lastSpell.getAmount() > 1)
                         lastSpell.setAmount(lastSpell.getAmount()-1);
@@ -101,7 +101,7 @@ abstract public class Spell {
                 }
 
             }
-        }.runTaskTimerAsynchronously(plugin, 20, 20);
+        }.runTaskTimerAsynchronously(plugin, 0, 20);
         this.wand.getActiveSpells().add(task);
 
     }
@@ -123,7 +123,7 @@ abstract public class Spell {
                         long cTime = System.currentTimeMillis();
                         if (time > cTime) {
                             if (item.getAmount() > 1) {
-                                item.setAmount(0);
+                                item.setAmount(item.getAmount()-1);
                             }
                         } else {
                             ItemUtils.removeNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
@@ -134,6 +134,9 @@ abstract public class Spell {
                 }.runTaskTimerAsynchronously(plugin, 20, 20);
                 wand.getActiveSpells().add(task);
 
+            }else{
+                ItemUtils.removeNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                item.setAmount(1);
             }
 
         }
