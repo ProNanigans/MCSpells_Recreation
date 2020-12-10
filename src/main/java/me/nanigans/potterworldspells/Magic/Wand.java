@@ -29,6 +29,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Wand implements Listener {
 
@@ -342,12 +343,16 @@ public class Wand implements Listener {
         Map<String, Object> hotbar = YamlGenerator.getConfigSectionValue(data.get(YamlPaths.HOTBARS.getPath()+"."+hotbarPage), true);
         hotbar = hotbar == null ? new HashMap<>() : hotbar;
         if(hotbar.size() > 0){
+            AtomicBoolean add = new AtomicBoolean(false);
             hotbar.forEach((i, j) -> {
                 int pos = Integer.parseInt(i);
+                if(add.get()) pos++;
                 if(pos < 9){
                     int handPos = player.getInventory().getHeldItemSlot();
-                    if(pos == handPos)
+                    if(pos == handPos) {
                         pos = player.getInventory().firstEmpty();
+                        add.set(true);
+                    }
                 }
                 player.getInventory().setItem(pos, (ItemStack) j);
             });
@@ -379,29 +384,52 @@ public class Wand implements Listener {
     private void setUpInventory(){
 
         final Spells[] values = Spells.values();
+        Map<String, Map<String, Map<Integer, ItemStack>>> wandInventory = new HashMap<>();
         Map<String, Map<Integer, ItemStack>> inventorySpellPlacement = new HashMap<>();
-        Map<Integer, ItemStack> spellPlacement = new HashMap<>();
+        Map<Integer, ItemStack> inventorySpells = new HashMap<>();
+        Map<String, Map<Integer, ItemStack>> hotbarSpellsPlacement = new HashMap<>();
+        Map<Integer, ItemStack> hotbarSpells = new HashMap<>();
 
-        int invNum = wandPage;
-        for (int i = 0; i < values.length; i++) {
-            if(i >= player.getInventory().getStorageContents().length){
-                inventorySpellPlacement.put(String.valueOf(invNum), spellPlacement);
+        int invNum = 1;
+        int hotbarNum = 1;
+        int hbIndx = 0;
+        for (Spells value : values) {
+
+            if (hbIndx > player.getInventory().getStorageContents().length) {
+                inventorySpellPlacement.put(String.valueOf(invNum), inventorySpells);
+                hotbarSpellsPlacement.put(String.valueOf(hotbarNum), hotbarSpells);
+                hotbarSpells.clear();
+                inventorySpells.clear();
+                hbIndx = 0;
                 invNum++;
+                hotbarNum++;
             }
+
             ItemStack item = new ItemStack(Material.DIAMOND_AXE);
             final ItemMeta itemMeta = item.getItemMeta();
-            itemMeta.setDisplayName(values[i].getName());
-            itemMeta.setCustomModelData(values[i].getData());
+            itemMeta.setDisplayName(value.getName());
+            itemMeta.setCustomModelData(value.getData());
             item.setItemMeta(itemMeta);
-            ItemUtils.setData(ItemUtils.setData(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), values[i].getName()),
-                    Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType(), values[i].getSpellType());
+            ItemUtils.setData(ItemUtils.setData(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), value.getName()),
+                    Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType(), value.getSpellType());
 
-            spellPlacement.put(i, item);
+            if (hbIndx < 9) {
+                hotbarSpells.put(hbIndx, item);
+            } else inventorySpells.put(hbIndx, item);
+
+            hbIndx++;
+
         }
-        inventorySpellPlacement.put(String.valueOf(invNum), spellPlacement);
-        clearAllNotWand();
-        inventorySpellPlacement.get(String.valueOf(wandPage)).forEach((i, j) -> player.getInventory().addItem(j));
-
+        inventorySpellPlacement.put(String.valueOf(invNum), inventorySpells);
+        hotbarSpellsPlacement.put(String.valueOf(hotbarNum), hotbarSpells);
+        wandInventory.put("Hotbars", hotbarSpellsPlacement);
+        wandInventory.put("inventory", inventorySpellPlacement);
+        YamlGenerator yaml = new YamlGenerator(FilePaths.USERS+"/"+player.getUniqueId()+".yml");
+        final FileConfiguration data = yaml.getData();
+        System.out.println("wandInventory = " + wandInventory);
+        data.set(YamlPaths.SPELL_INVENTORY.getPath(), wandInventory);
+        yaml.save();
+        loadPlayerSpells(new File(FilePaths.USERS+"/"+player.getUniqueId()+".yml"));
     }
 
     /**
