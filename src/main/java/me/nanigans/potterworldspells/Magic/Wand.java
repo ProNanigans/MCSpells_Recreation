@@ -433,9 +433,8 @@ public class Wand implements Listener {
         Map<String, Map<Integer, ItemStack>> hotbarSpellsPlacement = new HashMap<>();
         Map<Integer, ItemStack> hotbarSpells = new HashMap<>();
 
-        int invNum = 1;
-        int hotbarNum = 1;
-        int hbIndx = 0;
+        int invNum = 1, hotbarNum = 1, hbIndx = 0;
+
         for (Spells value : values) {
 
             if (hbIndx > player.getInventory().getStorageContents().length) {
