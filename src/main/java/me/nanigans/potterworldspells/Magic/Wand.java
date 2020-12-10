@@ -151,22 +151,36 @@ public class Wand implements Listener {
     }
 
     /**
-     * Handles inventory drops
+     * Handles inventory drops.
+     * When player drops wand, we switch the current hotbar.
+     * If player drops spell from inventory, we cast the spell.
+     * All actions are cancelled if the player is in the spell inventory.
      * @param event PlayerDropItemEvent
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void itemDrop(PlayerDropItemEvent event){
-
-        if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())){
-            canCastSpells = false;
+    public void itemDrop(PlayerDropItemEvent event) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())) {
             event.setCancelled(true);
-            swapHotbar(ClickType.RIGHT);
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    canCastSpells = true;
+            if (event.getItemDrop().getItemStack().getType() == this.wand.getType()) {
+                canCastSpells = false;
+                swapHotbar(ClickType.RIGHT);
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        canCastSpells = true;
+                    }
+                }.runTaskLater(plugin, 0);
+            }else{
+                ItemStack item = event.getItemDrop().getItemStack();
+                if(ItemUtils.hasNBT(item, Data.SPELLNAME.toString(), Data.SPELLTYPE.getType())){
+
+                    String spell = ItemUtils.getNBT(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
+                    String spellType = ItemUtils.getNBT(item, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
+                    final Class<?> aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells."+spellType+"."+spell);
+                    aClass.getConstructor(Wand.class).newInstance(this);
+
                 }
-            }.runTaskLater(plugin, 0);
+            }
         }
 
     }
