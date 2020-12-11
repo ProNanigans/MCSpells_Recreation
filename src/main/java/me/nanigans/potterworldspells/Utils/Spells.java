@@ -8,6 +8,9 @@ public enum Spells {
     ASCENDIO("Ascendio", 14, "Mobility"),
     TRIPUDIO("Tripudo", 181, "Mobility"),
     VOLO("Volo", 182, "Mobility"),
+    EPISKEY("Episkey", 55, "Healing"),
+    FERUVIO("Feruvio", 141, "Healing"),
+    VULNERA("Vulnera", 140, "Healing"),
     AGUAMENTI("Aguamenti", 4, "Combat");
     String name, spellType;
     int data;

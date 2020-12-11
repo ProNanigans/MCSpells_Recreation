@@ -5,6 +5,7 @@ import me.nanigans.potterworldspells.PotterWorldSpells;
 import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.ItemUtils;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,8 +14,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 
 abstract public class Spell implements Listener {
@@ -116,11 +119,9 @@ abstract public class Spell implements Listener {
 
     public static void reloadCooldown(ItemStack item, Wand wand, PotterWorldSpells plugin, int pos) {
 
-        System.out.println("item = " + item);
         if (ItemUtils.hasNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
 
             long time = (long) ItemUtils.getNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
-            System.out.println("time = " + time);
             long currentTime = System.currentTimeMillis();
             long remainingTime = time - currentTime;
             if (remainingTime > 0) {
@@ -137,7 +138,6 @@ abstract public class Spell implements Listener {
                         long cTime = System.currentTimeMillis();
                         if (time > cTime) {
                             if (item.getAmount() > 1) {
-                                System.out.println("item.getAmount() = " + item.getAmount());
                                 item.setAmount(Math.max(item.getAmount()-1, 1));
                                 wand.getPlayer().getInventory().setItem(pos, item);
                             }
@@ -179,7 +179,23 @@ abstract public class Spell implements Listener {
         }
     }
 
+    protected Entity getEntityAt(double hitboxRadius, Location loc) {
+        final Entity[] ent = new Entity[1];
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                BoundingBox box = new BoundingBox(loc.getX() - hitboxRadius, loc.getY() - hitboxRadius, loc.getZ() - hitboxRadius, loc.getX() + hitboxRadius, loc.getY() + hitboxRadius, loc.getZ() + hitboxRadius);
 
+                Collection<Entity> ents = loc.getWorld().getNearbyEntities(box);
+                if (ents.size() > 0) {
+                    Entity[] entArr = ents.toArray(new Entity[0]);
+                    ent[0] = entArr[0];
+
+                }
+            }
+        }.runTask(plugin);
+        return ent[0];
+    }
 
     protected Location getSpellCastLoc(){
         if(player.getMainHand() == MainHand.RIGHT)

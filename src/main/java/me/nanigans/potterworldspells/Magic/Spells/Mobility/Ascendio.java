@@ -1,15 +1,13 @@
 package me.nanigans.potterworldspells.Magic.Spells.Mobility;
 
 import de.slikey.effectlib.effect.TraceEffect;
-import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Mobility;
 import me.nanigans.potterworldspells.Magic.Wand;
 import org.bukkit.Color;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.util.Vector;
 
-public class Ascendio extends Mobility implements SpellCasting {
+public class Ascendio extends Mobility{
     private double launchAmt = 2.5;
 
     public Ascendio(Wand wand) {
@@ -31,14 +29,4 @@ public class Ascendio extends Mobility implements SpellCasting {
 
     }
 
-    @Override
-    public void onHit(Location hit) {
-
-    }
-
-    @Override
-    public Location whileFiring(Vector p1, Vector vector) {
-
-        return null;
-    }
 }

@@ -9,6 +9,7 @@ import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.ItemUtils;
 import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -221,6 +223,7 @@ public class Wand implements Listener {
                         this.wandPage = maxInventoryPages;
                     else this.wandPage--;
                 }
+                player.playSound(player.getEyeLocation(), "magic.paperturn", 1, 1);
                 clearInventory();
                 loadSpellInventory(new File(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml"));
 
@@ -243,6 +246,7 @@ public class Wand implements Listener {
             event.setCancelled(true);
             if (event.getItemDrop().getItemStack().getType() == this.wand.getType()) {
                 canCastSpells = false;
+                player.playSound(player.getEyeLocation(), "magic.paperturn", 1, 1);
                 swapHotbar(ClickType.RIGHT);
                 new BukkitRunnable() {
                     @Override
@@ -565,9 +569,15 @@ public class Wand implements Listener {
         wandInventory.put("inventory", inventorySpellPlacement);
         YamlGenerator yaml = new YamlGenerator(FilePaths.USERS+"/"+player.getUniqueId()+".yml");
         final FileConfiguration data = yaml.getData();
-        System.out.println("wandInventory = " + wandInventory);
         data.set(YamlPaths.SPELL_INVENTORY.getPath(), wandInventory);
+        Random rand = new Random();
+        java.awt.Color color = new java.awt.Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat());
+        System.out.println("color = " + color);
+        data.set(YamlPaths.PARTICLECOLOR.getPath(), color.getRGB());
         yaml.save();
+        System.out.println("data.getCurrentPath() = " + data.getCurrentPath());
+        System.out.println("data.getInt(YamlPaths.PARTICLECOLOR) = " + data.getInt(YamlPaths.PARTICLECOLOR.getPath()));
+        System.out.println(getWandColor());
         loadPlayerSpells(new File(FilePaths.USERS+"/"+player.getUniqueId()+".yml"));
     }
 
@@ -645,6 +655,14 @@ public class Wand implements Listener {
                 player.getInventory().removeItem(item);
             }
         }
+    }
+
+    public Color getWandColor(){
+        YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
+        final FileConfiguration data = yaml.getData();
+        final int rgbCol = data.getInt(YamlPaths.PARTICLECOLOR.getPath());
+        return Color.fromRGB(rgbCol);
+
     }
 
     public Map<String, Integer[]> getSpellLoc() {

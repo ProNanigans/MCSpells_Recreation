@@ -5,6 +5,7 @@ public enum YamlPaths {
     INVENTORY("inventories.PlayerInventory"),
     SPELL_INVENTORY("inventories.SpellInventory"),
     HOTBARS("inventories.SpellInventory.Hotbars"),
+    PARTICLECOLOR("magic.particlecolor"),
     INVENTORIES("inventories.SpellInventory.inventory");
     String path;
     YamlPaths(String path) {

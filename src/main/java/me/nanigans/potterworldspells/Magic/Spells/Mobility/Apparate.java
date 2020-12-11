@@ -21,9 +21,8 @@ public class Apparate extends Mobility implements SpellCasting {
     private double distance = 25D;
     private double spacing = 0.5;
     protected double cooldown = 10D;
-    private Particle.DustOptions color = new Particle.DustOptions(
-        Color.AQUA, 1f
-    );
+    private Particle.DustOptions color = new Particle.DustOptions(wand.getWandColor(), 1);
+
     private Particle particle = Particle.REDSTONE;
 
     public Apparate(Wand wand) {
@@ -33,7 +32,7 @@ public class Apparate extends Mobility implements SpellCasting {
             addCooldown();
 
             AnimatedBallEffect ball = new AnimatedBallEffect(plugin.manager);
-            ball.color = color.getColor();
+            ball.color = wand.getWandColor();
             ball.setEntity(player);
             ball.asynchronous = true;
             ball.iterations = 20;
