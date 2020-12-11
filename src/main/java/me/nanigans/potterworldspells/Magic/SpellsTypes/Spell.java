@@ -105,7 +105,7 @@ abstract public class Spell {
 
             }
         }.runTaskTimerAsynchronously(plugin, 20, 20);
-        this.wand.getActiveSpells().put(lastSpell, task);
+        this.wand.getActiveSpells().put(lastSpell.getItemMeta().getDisplayName(), task);
 
     }
 
@@ -121,7 +121,7 @@ abstract public class Spell {
             if (remainingTime > 0) {
 
                 int amount = (int) Math.ceil(remainingTime/1000D);
-                if(amount > 0)
+                if(amount > 1)
                 item.setAmount(amount);
                 BukkitTask task = new BukkitRunnable() {
                     @Override
@@ -132,6 +132,7 @@ abstract public class Spell {
                         long cTime = System.currentTimeMillis();
                         if (time > cTime) {
                             if (item.getAmount() > 1) {
+                                System.out.println("item.getAmount() = " + item.getAmount());
                                 item.setAmount(Math.max(item.getAmount()-1, 1));
                                 wand.getPlayer().getInventory().setItem(pos, item);
                             }
@@ -143,7 +144,7 @@ abstract public class Spell {
                     }
 
                 }.runTaskTimerAsynchronously(plugin, 20, 20);
-                wand.getActiveSpells().put(item, task);
+                wand.getActiveSpells().put(item.getItemMeta().getDisplayName(), task);
 
             }else{
                 ItemUtils.removeNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
@@ -157,11 +158,10 @@ abstract public class Spell {
     /**
      * Removes the cooldown on a spell if it exists
      */
-    public static void removeCooldown(Wand wand, ItemStack item){
-        if(wand.getActiveSpells().containsKey(item)){
-            System.out.println("item = " + item);
-            wand.getActiveSpells().get(item).cancel();
-
+    public static void removeCooldown(Wand wand, String name){
+        if(wand.getActiveSpells().containsKey(name)){
+            System.out.println("item = " + name);
+            wand.getActiveSpells().get(name).cancel();
         }
     }
 

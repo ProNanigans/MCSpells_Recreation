@@ -18,6 +18,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -42,7 +43,7 @@ public class Wand implements Listener {
     private int hotbarPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
-    private Map<ItemStack, BukkitTask> activeSpells = new HashMap<>();
+    private Map<String, BukkitTask> activeSpells = new HashMap<>();
     private double mana = 100;
     private ItemStack lastSpell;
     public final static short maxHotBarPages = 2;
@@ -76,12 +77,52 @@ public class Wand implements Listener {
      */
     @EventHandler
     public void swapInventories(InventoryClickEvent event){
+        if(event.getWhoClicked().getUniqueId().equals(player.getUniqueId())) {
+            swapInventory(event);
+            spellRightClicked(event);
+            moveItem(event);
+            dropInventorySpell(event);
+        }
 
-        swapInventory(event);
-        spellRightClicked(event);
+    }
+
+    /**
+     * When a player drops a spell in their inventory, we cast it
+     * @param event InventoryClickEvent because for some reason, an inventory drop is a click
+     */
+    private void dropInventorySpell(InventoryClickEvent event){
+
+        if(event.getAction() == InventoryAction.DROP_ONE_SLOT) {
+            event.setCancelled(true);
+            ItemStack item = event.getCurrentItem();
+            if (ItemUtils.hasNBT(item, Data.SPELLNAME.toString(), Data.SPELLTYPE.getType())) {
+                lastSpell = player.getInventory().getItem(player.getInventory().first(item));
+                String spell = ItemUtils.getNBT(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
+                String spellType = ItemUtils.getNBT(item, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
+                Class<?> aClass = null;
+                try {
+                    aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells." + spellType + "." + spell);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    aClass.getConstructor(Wand.class).newInstance(this);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Handles when the player moves a spell around. We need to update the cooldown to the new slot the player placed the spell at
+     * @param event InventoryClickEvent
+     */
+    private void moveItem(InventoryClickEvent event){
 
         System.out.println("event.getAction() = " + event.getAction());
-        if(event.getAction().toString().toLowerCase().contains("place")){
+        if(event.getAction() == InventoryAction.PLACE_ALL){
             System.out.println(event.getCursor() + " " + event.getSlot());
             final Wand that = this;
             new BukkitRunnable() {
@@ -91,10 +132,8 @@ public class Wand implements Listener {
                 }
             }.runTaskLater(plugin, 0);
             if(event.getCurrentItem() != null) event.getCurrentItem().setAmount(0);
-        }else if(event.getAction().toString().toLowerCase().contains("place")){
-
-            Spell.removeCooldown(this, player.getInventory().getItem(event.getSlot()));
-
+        }else if(event.getAction() == InventoryAction.PICKUP_ALL){
+            Spell.removeCooldown(this, event.getCurrentItem().getItemMeta().getDisplayName());
         }
 
     }
@@ -112,6 +151,7 @@ public class Wand implements Listener {
                     Data loc = Data.PAGENUM;
                     if (position < 9) loc = Data.HOTBARNUM;
                     changeSpell(event.getCurrentItem(), position, loc);
+                    player.closeInventory();
 
                 }
             }
@@ -189,16 +229,6 @@ public class Wand implements Listener {
                         canCastSpells = true;
                     }
                 }.runTaskLater(plugin, 0);
-            }else{
-                ItemStack item = event.getItemDrop().getItemStack();
-                if(ItemUtils.hasNBT(item, Data.SPELLNAME.toString(), Data.SPELLTYPE.getType())){
-
-                    String spell = ItemUtils.getNBT(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
-                    String spellType = ItemUtils.getNBT(item, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
-                    final Class<?> aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells."+spellType+"."+spell);
-                    aClass.getConstructor(Wand.class).newInstance(this);
-
-                }
             }
         }
 
@@ -611,7 +641,7 @@ public class Wand implements Listener {
         this.mana = mana;
     }
 
-    public Map<ItemStack, BukkitTask> getActiveSpells() {
+    public Map<String, BukkitTask> getActiveSpells() {
         return activeSpells;
     }
 
