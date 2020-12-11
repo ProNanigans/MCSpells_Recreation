@@ -19,6 +19,7 @@ import org.bukkit.util.Vector;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 abstract public class Spell implements Listener {
@@ -184,16 +185,18 @@ abstract public class Spell implements Listener {
     protected static Entity[] getEntitiesRadius(Location l, double radius) {
         double chunkRadius = radius < 16 ? 1 : (radius - (radius % 16)) / 16;
         HashSet<Entity> radiusEntities = new HashSet<>();
-
-        for (double chX = -chunkRadius; chX <= chunkRadius; chX++) {
-            for (double chZ = -chunkRadius; chZ <= chunkRadius; chZ++) {
-                int x = (int) l.getX(), y = (int) l.getY(), z = (int) l.getZ();
-                for (Entity e : new Location(l.getWorld(), x + (chX * 16), y, z + (chZ * 16)).getChunk().getEntities()) {
-                    if (e.getLocation().distance(l) <= radius && e.getLocation().getBlock() != l.getBlock())
-                        radiusEntities.add(e);
+        try {
+            for (double chX = -chunkRadius; chX <= chunkRadius; chX++) {
+                for (double chZ = -chunkRadius; chZ <= chunkRadius; chZ++) {
+                    int x = (int) l.getX(), y = (int) l.getY(), z = (int) l.getZ();
+                    for (Entity e : new Location(l.getWorld(), x + (chX * 16), y, z + (chZ * 16)).getChunk().getEntities()) {
+                        if (e != null)
+                            if (e.getLocation().distance(l) <= radius && e.getLocation().getBlock() != l.getBlock())
+                                radiusEntities.add(e);
+                    }
                 }
             }
-        }
+        }catch(NoSuchElementException ignored){}
 
         return radiusEntities.toArray(new Entity[radiusEntities.size()]);
     }

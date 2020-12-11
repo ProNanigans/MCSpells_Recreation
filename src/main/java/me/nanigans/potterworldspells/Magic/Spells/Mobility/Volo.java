@@ -16,6 +16,7 @@ public class Volo extends Mobility {
         super(wand);
         super.cooldDown = 6D;
         player.playSound(player.getEyeLocation(), "magic.whoosh6", 1, 1);
+
         WarpEffect warp = new WarpEffect(plugin.manager);
         warp.asynchronous = true;
         warp.color = wand.getWandColor();
@@ -33,7 +34,7 @@ public class Volo extends Mobility {
         effect.particle = Particle.REDSTONE;
         effect.offset = new Vector(0, -1.5, 0);
         effect.setEntity(player);
-        effect.iterations = effectLength;
+        effect.duration = effectLength/20*1000;
         effect.radius = 0.5f;
         effect.grow = 0;
         effect.start();

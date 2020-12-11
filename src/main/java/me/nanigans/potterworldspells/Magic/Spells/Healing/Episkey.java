@@ -5,7 +5,6 @@ import me.nanigans.potterworldspells.Magic.Spells.HitTypes;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Healing;
 import me.nanigans.potterworldspells.Magic.Wand;
-import net.minecraft.server.v1_16_R3.TileEntity;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -13,31 +12,25 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class Episkey extends Healing implements SpellCasting {
-    private double spacing = 0.25;
-    private double range = 58.5;
-    private Particle particle = Particle.REDSTONE;
-    private double hitRad = 0.25;
-    private boolean endSpell = false;
-    private short healAmt = 4;
-    private Particle.DustOptions color = new Particle.DustOptions(Color.MAROON, 1);
+    private final double spacing = 0.25;
+    private final double range = 58.5;
+    private final Particle particle = Particle.REDSTONE;
+    private final double hitRad = 0.25;
+    private final boolean endSpell = false;
+    private final short healAmt = 4;
+    private final Particle.DustOptions color = new Particle.DustOptions(Color.MAROON, 1);
     private HitTypes hit;
     private Entity hitEnt;
 
     public Episkey(Wand wand) {
         super(wand);
-        player.playSound(player.getEyeLocation(), "magic.hit", 1, 1);
-        super.cooldDown = 1D;
+        player.playSound(player.getEyeLocation(), "magic.hit", 500, 1);
+        super.cooldDown = 10D;
         cast(range, spacing, 0, this::whileFiring, this::onHit);
         addCooldown();
     }
@@ -48,11 +41,6 @@ public class Episkey extends Healing implements SpellCasting {
         player.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, hitLoc, 5, 0, 0, 0, 0.1);
 
         if(hit == null || hit == HitTypes.ENTITY){
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-
-
             Entity healed = player;
             if(hitEnt != null) healed = hitEnt;
              healed.getWorld().playSound(healed.getLocation(), "magic.heal1", 1, 1);
@@ -79,8 +67,6 @@ public class Episkey extends Healing implements SpellCasting {
                 }
             }.runTaskLaterAsynchronously(plugin, 40);
 
-        }
-            }.runTask(plugin);
         }
 
     }

@@ -33,7 +33,7 @@ public class Tripudo extends Mobility {
         effect.particle = Particle.REDSTONE;
         effect.offset = new Vector(0, -1.5, 0);
         effect.setEntity(player);
-        effect.iterations = effectLength;
+        effect.duration = effectLength/20*1000;
         effect.radius = 0.5f;
         effect.grow = 0;
         effect.start();
