@@ -80,8 +80,8 @@ public class Wand implements Listener {
         if(event.getWhoClicked().getUniqueId().equals(player.getUniqueId())) {
             swapInventory(event);
             spellRightClicked(event);
-            moveItem(event);
             dropInventorySpell(event);
+            moveItem(event);
         }
 
     }
@@ -96,20 +96,26 @@ public class Wand implements Listener {
             event.setCancelled(true);
             ItemStack item = event.getCurrentItem();
             if (ItemUtils.hasNBT(item, Data.SPELLNAME.toString(), Data.SPELLTYPE.getType())) {
-                lastSpell = player.getInventory().getItem(player.getInventory().first(item));
-                String spell = ItemUtils.getNBT(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
-                String spellType = ItemUtils.getNBT(item, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
-                Class<?> aClass = null;
-                try {
-                    aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells." + spellType + "." + spell);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    aClass.getConstructor(Wand.class).newInstance(this);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
+                final Wand that = this;
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        lastSpell = player.getInventory().getItem(player.getInventory().first(item));
+                        String spell = ItemUtils.getNBT(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
+                        String spellType = ItemUtils.getNBT(item, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
+                        Class<?> aClass = null;
+                        try {
+                            aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells." + spellType + "." + spell);
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            aClass.getConstructor(Wand.class).newInstance(that);
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }.runTaskLater(plugin, 0);
             }
         }
 
@@ -121,9 +127,23 @@ public class Wand implements Listener {
      */
     private void moveItem(InventoryClickEvent event){
 
-        System.out.println("event.getAction() = " + event.getAction());
-        if(event.getAction() == InventoryAction.PLACE_ALL){
-            System.out.println(event.getCursor() + " " + event.getSlot());
+        if(event.getAction() != InventoryAction.SWAP_WITH_CURSOR) {
+            if (event.getAction() == InventoryAction.PLACE_ALL) {
+                System.out.println(event.getCursor() + " " + event.getSlot());
+                final Wand that = this;
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        Spell.reloadCooldown(player.getInventory().getItem(event.getSlot()), that, plugin, event.getSlot());
+                    }
+                }.runTaskLater(plugin, 0);
+            } else if (event.getAction() == InventoryAction.PICKUP_ALL) {
+                if (event.getCurrentItem() != null)
+                    Spell.removeCooldown(this, event.getCurrentItem().getItemMeta().getDisplayName());
+            } else if (event.getAction() != InventoryAction.DROP_ONE_SLOT) event.setCancelled(true);
+        }//curren item is the new thing being held, cursor is the old thing being held
+        else{
+            Spell.removeCooldown(this, event.getCurrentItem().getItemMeta().getDisplayName());
             final Wand that = this;
             new BukkitRunnable() {
                 @Override
@@ -131,11 +151,7 @@ public class Wand implements Listener {
                     Spell.reloadCooldown(player.getInventory().getItem(event.getSlot()), that, plugin, event.getSlot());
                 }
             }.runTaskLater(plugin, 0);
-            if(event.getCurrentItem() != null) event.getCurrentItem().setAmount(0);
-        }else if(event.getAction() == InventoryAction.PICKUP_ALL){
-            Spell.removeCooldown(this, event.getCurrentItem().getItemMeta().getDisplayName());
         }
-
     }
 
     /**
