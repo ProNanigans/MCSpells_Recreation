@@ -6,6 +6,9 @@ import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.ItemUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -14,19 +17,22 @@ import org.bukkit.util.Vector;
 
 import java.util.function.Consumer;
 
-abstract public class Spell {
+abstract public class Spell implements Listener {
     protected double cooldDown = 0D;// in seconds
     protected Wand wand;
     protected Player player;
     protected PotterWorldSpells plugin;
     protected ItemStack spell;
     protected BukkitTask task;
+    protected boolean savedFromFall = false;
+    protected long saveFallTime = 0;
 
     public Spell(Wand wand){
         this.wand = wand;
         this.player = wand.getPlayer();
         this.plugin = wand.getPlugin();
         this.spell = wand.getLastSpell();
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     /**
@@ -154,13 +160,22 @@ abstract public class Spell {
         }
     }
 
+    @EventHandler
+    public void fallDamage(EntityDamageEvent event){
+
+        if(event.getEntity() instanceof Player){
+            if(event.getCause() == EntityDamageEvent.DamageCause.FALL)
+                event.setCancelled(System.currentTimeMillis() < saveFallTime);
+
+        }
+
+    }
 
     /**
      * Removes the cooldown on a spell if it exists
      */
     public static void removeCooldown(Wand wand, String name){
         if(wand.getActiveSpells().containsKey(name)){
-            System.out.println("item = " + name);
             wand.getActiveSpells().get(name).cancel();
         }
     }

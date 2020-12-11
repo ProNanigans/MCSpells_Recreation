@@ -143,9 +143,9 @@ public class Wand implements Listener {
             } else if (event.getAction() != InventoryAction.DROP_ONE_SLOT) event.setCancelled(true);
         }//curren item is the new thing being held, cursor is the old thing being held
         else{
-            Spell.removeCooldown(this, event.getCurrentItem().getItemMeta().getDisplayName());
+            Spell.removeCooldown(this, event.getCurrentItem().getItemMeta().getDisplayName());//remove cooldown for item being picked up
             final Wand that = this;
-            new BukkitRunnable() {
+            new BukkitRunnable() {//reload cooldown for item being placed
                 @Override
                 public void run() {
                     Spell.reloadCooldown(player.getInventory().getItem(event.getSlot()), that, plugin, event.getSlot());
@@ -400,6 +400,7 @@ public class Wand implements Listener {
 
         File file = new File(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
         if(inWand.containsKey(player.getUniqueId())) {
+            player.playSound(player.getLocation(), "magic.wandup", 1, 1);
             if (file.exists()) {
                 ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
 
@@ -412,6 +413,7 @@ public class Wand implements Listener {
         }else{
 
             if(file.exists()){
+                player.playSound(player.getLocation(), "magic.wanddown", 1, 1);
                 ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
                 this.activeSpells.forEach((i, j) -> j.cancel());
                 this.activeSpells.clear();

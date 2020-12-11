@@ -59,6 +59,8 @@ public class Apparate extends Mobility {
                 final Location location = new Location(player.getWorld(), hit.getX(), hit.getY(), hit.getZ(), player.getLocation().getYaw(), player.getLocation().getPitch());
                 player.teleport(location.clone().add(0, 1.5, 0));
                 player.getWorld().playSound(player.getLocation(), "magic.apparate", 1, 1);
+                savedFromFall = true;
+                saveFallTime = System.currentTimeMillis()+5000;
 
             }
         }.runTask(plugin);
