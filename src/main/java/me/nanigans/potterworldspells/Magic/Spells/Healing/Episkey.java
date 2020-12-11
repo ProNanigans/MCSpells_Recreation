@@ -14,9 +14,11 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,12 +32,12 @@ public class Episkey extends Healing implements SpellCasting {
     private short healAmt = 4;
     private Particle.DustOptions color = new Particle.DustOptions(Color.MAROON, 1);
     private HitTypes hit;
-    private List<Entity> hitEnts;
+    private Entity hitEnt;
 
     public Episkey(Wand wand) {
         super(wand);
         player.playSound(player.getEyeLocation(), "magic.hit", 1, 1);
-        super.cooldDown = 10D;
+        super.cooldDown = 1D;
         cast(range, spacing, 0, this::whileFiring, this::onHit);
         addCooldown();
     }
@@ -46,14 +48,14 @@ public class Episkey extends Healing implements SpellCasting {
         player.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, hitLoc, 5, 0, 0, 0, 0.1);
 
         if(hit == null || hit == HitTypes.ENTITY){
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+
 
             Entity healed = player;
-            final Entity entityAt = getEntityAt(hitRad, hitLoc);
-            System.out.println("entityAt = " + entityAt);;
-            if(entityAt != null) healed = entityAt;
-            if(hitEnts != null && !hitEnts.isEmpty()) healed = hitEnts.get(0);
+            if(hitEnt != null) healed = hitEnt;
              healed.getWorld().playSound(healed.getLocation(), "magic.heal1", 1, 1);
-            System.out.println("hitEnts = " + healed);
 
             WarpEffect effect = new WarpEffect(plugin.manager);
             effect.particle = Particle.HEART;
@@ -78,6 +80,8 @@ public class Episkey extends Healing implements SpellCasting {
             }.runTaskLaterAsynchronously(plugin, 40);
 
         }
+            }.runTask(plugin);
+        }
 
     }
 
@@ -94,22 +98,17 @@ public class Episkey extends Healing implements SpellCasting {
             hit = HitTypes.ENTITY;
             return loc;
         }
-        final Entity entityAt = getEntityAt(hitRad, loc);
-        System.out.println("entityAt = " + entityAt);
-        if(entityAt != null)
-            return loc;
-//        new BukkitRunnable() {
-//            @Override
-//            public void run() {
-//                final List<Entity> nearbyEntities = player.getWorld().getNearbyEntities(loc, hitRad, hitRad, hitRad).stream()
-//                        .filter(i -> !(i instanceof LivingEntity)).collect(Collectors.toList());
-//                if(!(nearbyEntities.contains(player) && nearbyEntities.size() == 1)){
-//                    hitEnts = nearbyEntities;
-//                    endSpell = true;
-//                    hit = HitTypes.ENTITY;
-//                }
-//            }
-//        }.runTask(plugin);
+
+        final Entity[] entities = loc.getWorld().getChunkAt(loc).getEntities();
+        for (Entity entity : entities) {
+            if(!entity.equals(player))
+            if(entity instanceof LivingEntity && !((LivingEntity) entity).hasPotionEffect(PotionEffectType.DAMAGE_RESISTANCE)){
+                if(entity.getBoundingBox().expand(hitRad).contains(p1)){
+                    hitEnt = entity;
+                    return loc;
+                }
+            }
+        }
 
         if(endSpell) return loc;
 
