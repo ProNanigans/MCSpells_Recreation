@@ -24,7 +24,6 @@ abstract public class Spell implements Listener {
     protected PotterWorldSpells plugin;
     protected ItemStack spell;
     protected BukkitTask task;
-    protected boolean savedFromFall = false;
     protected long saveFallTime = 0;
 
     public Spell(Wand wand){

@@ -10,6 +10,7 @@ import me.nanigans.potterworldspells.Utils.ItemUtils;
 import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -101,18 +102,22 @@ public class Wand implements Listener {
                     @Override
                     public void run() {
                         lastSpell = player.getInventory().getItem(player.getInventory().first(item));
-                        String spell = ItemUtils.getNBT(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
-                        String spellType = ItemUtils.getNBT(item, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
-                        Class<?> aClass = null;
-                        try {
-                            aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells." + spellType + "." + spell);
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            aClass.getConstructor(Wand.class).newInstance(that);
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                            e.printStackTrace();
+                        if (!ItemUtils.hasNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
+                            String spell = ItemUtils.getNBT(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
+                            String spellType = ItemUtils.getNBT(item, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
+                            Class<?> aClass = null;
+                            try {
+                                aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells." + spellType + "." + spell);
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                aClass.getConstructor(Wand.class).newInstance(that);
+                            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                                e.printStackTrace();
+                            }
+                        }else{
+                            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1, 1);
                         }
                     }
                 }.runTaskLater(plugin, 0);
@@ -301,12 +306,15 @@ public class Wand implements Listener {
         if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId()) && canCastSpells){
             if(event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_AIR){
                 if(ItemUtils.hasNBT(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
+                    if(!ItemUtils.hasNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
+                        String spell = ItemUtils.getNBT(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
+                        String spellType = ItemUtils.getNBT(wand, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
+                        final Class<?> aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells." + spellType + "." + spell);
+                        aClass.getConstructor(Wand.class).newInstance(this);
 
-                    String spell = ItemUtils.getNBT(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
-                    String spellType = ItemUtils.getNBT(wand, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
-                    final Class<?> aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells."+spellType+"."+spell);
-                    aClass.getConstructor(Wand.class).newInstance(this);
-
+                    }else{
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1, 1);
+                    }
                 }
 
             }
