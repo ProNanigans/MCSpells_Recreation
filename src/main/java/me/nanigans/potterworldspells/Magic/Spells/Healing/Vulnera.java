@@ -14,8 +14,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.Arrays;
-
 public class Vulnera extends Healing implements SpellCasting {
 
     private final double range = 39D;
@@ -25,7 +23,9 @@ public class Vulnera extends Healing implements SpellCasting {
 
     public Vulnera(Wand wand) {
         super(wand);
+        super.cooldDown = 40D;
         cast(range, 0.5, 3, this::whileFiring, this::onHit);
+        addCooldown();
     }
 
     @Override

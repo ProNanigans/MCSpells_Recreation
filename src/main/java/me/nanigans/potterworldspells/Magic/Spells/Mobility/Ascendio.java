@@ -8,11 +8,12 @@ import org.bukkit.Particle;
 import org.bukkit.util.Vector;
 
 public class Ascendio extends Mobility{
-    private double launchAmt = 2.5;
+    private final double launchAmt = 2;
 
     public Ascendio(Wand wand) {
         super(wand);
 
+        super.cooldDown = 17D;
         player.getWorld().playSound(player.getEyeLocation(), "magic.ascendio1", 2, 1);
         final Vector direction = player.getEyeLocation().getDirection();
         player.setVelocity(direction.multiply(launchAmt));
@@ -26,7 +27,7 @@ public class Ascendio extends Mobility{
         effect.particleOffsetZ = 0.5F;
         effect.iterations = 20;
         effect.start();
-
+        addCooldown();
     }
 
 }
