@@ -31,8 +31,10 @@ public class ItemUtils {
     }
 
     public static <T, Z> boolean hasNBT(ItemStack item, String key, PersistentDataType<T, Z> type){
-        if(item.getItemMeta() == null) return false;
-        return item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, key), type);
+        if(item != null) {
+            if (item.getItemMeta() == null) return false;
+            return item.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(plugin, key), type);
+        }else return false;
     }
 
 

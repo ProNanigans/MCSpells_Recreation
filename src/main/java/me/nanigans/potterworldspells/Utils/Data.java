@@ -5,6 +5,7 @@ import org.bukkit.persistence.PersistentDataType;
 public enum Data {
 
     COOLDOWN("Cooldown", PersistentDataType.LONG),
+    LASTSPELL("Last_Spell", PersistentDataType.STRING),
     ISWAND("IsWand", PersistentDataType.BYTE),
     PAGENUM("Page", PersistentDataType.INTEGER),
     HOTBARNUM("Hotbar_Num", PersistentDataType.INTEGER),

@@ -19,7 +19,7 @@ public class Apparate extends Mobility {
     private double gravity = 0;
     private double distance = 25D;
     private double spacing = 0.5;
-    protected double cooldown = 5;
+    protected double cooldown = 10D;
     private Particle.DustOptions color = new Particle.DustOptions(
         Color.AQUA, 1f
     );
@@ -28,6 +28,7 @@ public class Apparate extends Mobility {
     public Apparate(Wand wand) {
         super(wand);
 
+        System.out.println("wand.getLastSpell() = " + wand.getLastSpell());
         if(!ItemUtils.hasNBT(wand.getLastSpell(), Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
             super.cooldDown = cooldown;
             addCooldown();

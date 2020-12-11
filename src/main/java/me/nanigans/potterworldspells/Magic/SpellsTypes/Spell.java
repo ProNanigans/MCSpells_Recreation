@@ -15,7 +15,7 @@ import org.bukkit.util.Vector;
 import java.util.function.Consumer;
 
 abstract public class Spell {
-    protected double cooldDown = 0D;
+    protected double cooldDown = 0D;// in seconds
     protected Wand wand;
     protected Player player;
     protected PotterWorldSpells plugin;
@@ -87,13 +87,16 @@ abstract public class Spell {
 
         final Spell that = this;
         this.task = new BukkitRunnable() {
+            final long spellTime = (long) ItemUtils.getNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
             @Override
             public void run() {
-                final long spellTime = (long) ItemUtils.getNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                if (wand.getPlayer().getInventory().first(lastSpell) == -1) {
+                    this.cancel();
+                }
                 final long time = System.currentTimeMillis();
                 if(spellTime > time){
                     if(lastSpell.getAmount() > 1)
-                        lastSpell.setAmount(lastSpell.getAmount()-1);
+                        lastSpell.setAmount(Math.max(lastSpell.getAmount()-1, 1));
                 }else{
                     ItemUtils.removeNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
                     wand.getActiveSpells().remove(that);
@@ -101,38 +104,46 @@ abstract public class Spell {
                 }
 
             }
-        }.runTaskTimerAsynchronously(plugin, 0, 20);
-        this.wand.getActiveSpells().add(task);
+        }.runTaskTimerAsynchronously(plugin, 20, 20);
+        this.wand.getActiveSpells().put(lastSpell, task);
 
     }
 
-    public static void reloadCooldown(ItemStack item, Wand wand, PotterWorldSpells plugin) {
+    public static void reloadCooldown(ItemStack item, Wand wand, PotterWorldSpells plugin, int pos) {
 
+        System.out.println("item = " + item);
         if (ItemUtils.hasNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
 
             long time = (long) ItemUtils.getNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+            System.out.println("time = " + time);
             long currentTime = System.currentTimeMillis();
-            long remainingTime = currentTime - time;
+            long remainingTime = time - currentTime;
             if (remainingTime > 0) {
 
-                int amount = (int) (currentTime - remainingTime);
+                int amount = (int) Math.ceil(remainingTime/1000D);
+                if(amount > 0)
                 item.setAmount(amount);
                 BukkitTask task = new BukkitRunnable() {
                     @Override
                     public void run() {
+                        if (wand.getPlayer().getInventory().first(item) == -1) {
+                            this.cancel();
+                        }
                         long cTime = System.currentTimeMillis();
                         if (time > cTime) {
                             if (item.getAmount() > 1) {
-                                item.setAmount(item.getAmount()-1);
+                                item.setAmount(Math.max(item.getAmount()-1, 1));
+                                wand.getPlayer().getInventory().setItem(pos, item);
                             }
                         } else {
                             ItemUtils.removeNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                            wand.getPlayer().getInventory().setItem(pos, item);
                             this.cancel();
                         }
                     }
 
                 }.runTaskTimerAsynchronously(plugin, 20, 20);
-                wand.getActiveSpells().add(task);
+                wand.getActiveSpells().put(item, task);
 
             }else{
                 ItemUtils.removeNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
@@ -146,11 +157,11 @@ abstract public class Spell {
     /**
      * Removes the cooldown on a spell if it exists
      */
-    protected void removeCooldown(){
-        if(this.task != null && !this.task.isCancelled()) {
-            ItemStack lastSpell = this.wand.getLastSpell();
-            lastSpell.setAmount(1);
-            this.task.cancel();
+    public static void removeCooldown(Wand wand, ItemStack item){
+        if(wand.getActiveSpells().containsKey(item)){
+            System.out.println("item = " + item);
+            wand.getActiveSpells().get(item).cancel();
+
         }
     }
 

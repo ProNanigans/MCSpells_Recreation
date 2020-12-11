@@ -29,7 +29,9 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Wand implements Listener {
@@ -40,7 +42,7 @@ public class Wand implements Listener {
     private int hotbarPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
-    private List<BukkitTask> activeSpells = new ArrayList<>();
+    private Map<ItemStack, BukkitTask> activeSpells = new HashMap<>();
     private double mana = 100;
     private ItemStack lastSpell;
     public final static short maxHotBarPages = 2;
@@ -77,6 +79,23 @@ public class Wand implements Listener {
 
         swapInventory(event);
         spellRightClicked(event);
+
+        System.out.println("event.getAction() = " + event.getAction());
+        if(event.getAction().toString().toLowerCase().contains("place")){
+            System.out.println(event.getCursor() + " " + event.getSlot());
+            final Wand that = this;
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Spell.reloadCooldown(player.getInventory().getItem(event.getSlot()), that, plugin, event.getSlot());
+                }
+            }.runTaskLater(plugin, 0);
+            if(event.getCurrentItem() != null) event.getCurrentItem().setAmount(0);
+        }else if(event.getAction().toString().toLowerCase().contains("place")){
+
+            Spell.removeCooldown(this, player.getInventory().getItem(event.getSlot()));
+
+        }
 
     }
 
@@ -314,6 +333,7 @@ public class Wand implements Listener {
             try {
                 ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage);
                 player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType(), this.hotbarPage));
+                this.activeSpells.forEach((i, j) -> j.cancel());
                 saveWandInventory();
                 saveWandHotbar();
                 inWand.remove(player.getUniqueId());
@@ -347,7 +367,7 @@ public class Wand implements Listener {
 
             if(file.exists()){
                 ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
-                this.activeSpells.forEach(BukkitTask::cancel);
+                this.activeSpells.forEach((i, j) -> j.cancel());
                 this.activeSpells.clear();
                 loadPlayerItems(file);
 
@@ -384,10 +404,10 @@ public class Wand implements Listener {
         if (spells.size() > 0) {
             spells.forEach((i, j) -> {
                 int pos = Integer.parseInt(i);
-                player.getInventory().setItem(pos, (ItemStack) j);
-                Spell.reloadCooldown((ItemStack) j, this, plugin);
+                ItemStack item = ((ItemStack) j).clone();
+                Spell.reloadCooldown(item, this, plugin, pos);
+                player.getInventory().setItem(pos, item);
             });
-
         }
     }
 
@@ -404,7 +424,8 @@ public class Wand implements Listener {
         Map<String, Object> hotbar = YamlGenerator.getConfigSectionValue(data.get(YamlPaths.HOTBARS.getPath()+"."+hotbarPage), true);
         hotbar = hotbar == null ? new HashMap<>() : hotbar;
         if(hotbar.size() > 0){
-            AtomicBoolean add = new AtomicBoolean(false);
+           AtomicBoolean add = new AtomicBoolean(false);
+
             hotbar.forEach((i, j) -> {
                 int pos = Integer.parseInt(i);
                 if(add.get()) pos++;
@@ -415,8 +436,9 @@ public class Wand implements Listener {
                         add.set(true);
                     }
                 }
-                player.getInventory().setItem(pos, (ItemStack) j);
-                Spell.reloadCooldown((ItemStack) j, this, plugin);
+                ItemStack item = ((ItemStack) j);
+                player.getInventory().setItem(pos, item);
+                Spell.reloadCooldown(item, this, plugin, pos);
             });
         }
     }
@@ -589,12 +611,8 @@ public class Wand implements Listener {
         this.mana = mana;
     }
 
-    public List<BukkitTask> getActiveSpells() {
+    public Map<ItemStack, BukkitTask> getActiveSpells() {
         return activeSpells;
-    }
-
-    public void setActiveSpells(List<BukkitTask> activeSpells) {
-        this.activeSpells = activeSpells;
     }
 
     /**
