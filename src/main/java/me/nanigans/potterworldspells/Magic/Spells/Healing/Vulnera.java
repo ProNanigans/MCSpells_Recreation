@@ -54,6 +54,7 @@ public class Vulnera extends Healing implements SpellCasting {
         effect.duration = 8000;
         effect.radius = radius;
         effect.start();
+        player.getWorld().playSound(hit, "magic.vulnera", 1, 1);
 
         new BukkitRunnable() {
             int tick = 0;
