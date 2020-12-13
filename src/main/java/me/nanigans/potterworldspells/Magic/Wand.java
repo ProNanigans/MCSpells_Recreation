@@ -31,6 +31,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -241,7 +242,7 @@ public class Wand implements Listener {
      * @param event PlayerDropItemEvent
      */
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void itemDrop(PlayerDropItemEvent event) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public void itemDrop(PlayerDropItemEvent event) {
         if(event.getPlayer().getUniqueId().equals(this.player.getUniqueId())) {
             event.setCancelled(true);
             if (event.getItemDrop().getItemStack().getType() == this.wand.getType()) {
@@ -310,7 +311,7 @@ public class Wand implements Listener {
             if(event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_AIR){
                 if(ItemUtils.hasNBT(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
                     if(!ItemUtils.hasNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
-                        String spell = ItemUtils.getNBT(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "");
+                        String spell = ItemUtils.getNBT(wand, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString().replace(" ", "_");
                         String spellType = ItemUtils.getNBT(wand, Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType()).toString();
                         final Class<?> aClass = Class.forName("me.nanigans.potterworldspells.Magic.Spells." + spellType + "." + spell);
                         aClass.getConstructor(Wand.class).newInstance(this);
@@ -455,9 +456,13 @@ public class Wand implements Listener {
      */
     private void loadSpellInventory(File fromFile) {
         YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
+        yaml.reloadData();
         final FileConfiguration data = yaml.getData();
+        System.out.println("data.saveToString() ===== " + data.saveToString());
+        System.out.println("data.get(YamlPaths.INVENTORIES.getPath()+\".\"+wandPage) = " + data.get(YamlPaths.INVENTORIES.getPath() + "." + wandPage));
         Map<String, Object> spells =
                 YamlGenerator.getConfigSectionValue(data.get(YamlPaths.INVENTORIES.getPath()+"."+wandPage), true);
+        System.out.println("spells = " + spells);
         spells = spells == null ? new HashMap<>() : spells;
 
         if (spells.size() > 0) {
@@ -532,10 +537,12 @@ public class Wand implements Listener {
         Map<Integer, ItemStack> inventorySpells = new HashMap<>();
         Map<String, Map<Integer, ItemStack>> hotbarSpellsPlacement = new HashMap<>();
         Map<Integer, ItemStack> hotbarSpells = new HashMap<>();
+        File playerFile = new File(FilePaths.USERS+"/"+player.getUniqueId()+".yml");
 
-        int invNum = 1, hotbarNum = 1, hbIndx = 0;
+        int invNum = 1, hotbarNum = 1, hbIndx = player.getInventory().firstEmpty();
 
         for (Spells value : values) {
+            System.out.println("value = " + value);
 
             if (hbIndx > player.getInventory().getStorageContents().length) {
                 inventorySpellPlacement.put(String.valueOf(invNum), inventorySpells);
@@ -552,6 +559,7 @@ public class Wand implements Listener {
             itemMeta.setDisplayName(value.getName());
             itemMeta.setCustomModelData(value.getData());
             item.setItemMeta(itemMeta);
+            System.out.println("item = " + item);
             ItemUtils.setData(ItemUtils.setData(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), value.getName()),
                     Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType(), value.getSpellType());
 
@@ -564,20 +572,26 @@ public class Wand implements Listener {
         }
         inventorySpellPlacement.put(String.valueOf(invNum), inventorySpells);
         hotbarSpellsPlacement.put(String.valueOf(hotbarNum), hotbarSpells);
+        System.out.println("hotbarSpellsPlacement = " + hotbarSpellsPlacement);
         wandInventory.put("Hotbars", hotbarSpellsPlacement);
         wandInventory.put("inventory", inventorySpellPlacement);
-        YamlGenerator yaml = new YamlGenerator(FilePaths.USERS+"/"+player.getUniqueId()+".yml");
+
+        YamlGenerator yaml = new YamlGenerator(playerFile.getAbsolutePath());
         final FileConfiguration data = yaml.getData();
-        data.set(YamlPaths.SPELL_INVENTORY.getPath(), wandInventory);
+
+        wandInventory.keySet().forEach(i -> wandInventory.get(i).keySet().forEach(j ->
+                wandInventory.get(i).get(j).keySet().forEach(k ->
+                        data.set(YamlPaths.SPELL_INVENTORY.getPath() + "." + i + "." + j + "." + k, wandInventory.get(i).get(j).get(k)))));
+
         Random rand = new Random();
         java.awt.Color color = new java.awt.Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat());
-        System.out.println("color = " + color);
         data.set(YamlPaths.PARTICLECOLOR.getPath(), color.getRGB());
         yaml.save();
-        System.out.println("data.getCurrentPath() = " + data.getCurrentPath());
-        System.out.println("data.getInt(YamlPaths.PARTICLECOLOR) = " + data.getInt(YamlPaths.PARTICLECOLOR.getPath()));
+
         System.out.println(getWandColor());
-        loadPlayerSpells(new File(FilePaths.USERS+"/"+player.getUniqueId()+".yml"));
+
+        loadPlayerSpells(playerFile);
+
     }
 
     /**

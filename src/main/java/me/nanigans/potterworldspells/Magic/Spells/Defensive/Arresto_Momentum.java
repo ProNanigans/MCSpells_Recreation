@@ -17,9 +17,10 @@ public class Arresto_Momentum extends Defensive {
         effect.asynchronous = true;
         effect.particle = Particle.SPELL;
         effect.duration = 3000;
+        effect.grow = 0;
         effect.offset = new Vector(0, -1.5, 0);
         effect.setEntity(player);
         effect.start();
-        player.getWorld().playSound(player.getLocation(), "magic.chargeup4", 1, 1);
+        player.getWorld().playSound(player.getLocation(), "magic.chargeup4", 100, 1);
     }
 }

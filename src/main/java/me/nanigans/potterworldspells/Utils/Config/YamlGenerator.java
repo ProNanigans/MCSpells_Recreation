@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class YamlGenerator {
     private FileConfiguration data;
-    private File messagesFile;
+    private final File messagesFile;
 
     private void load() {
         if (!this.messagesFile.exists()) {

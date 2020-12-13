@@ -11,6 +11,8 @@ public enum Spells {
     EPISKEY("Episkey", 55, "Healing"),
     FERUVIO("Feruvio", 141, "Healing"),
     VULNERA("Vulnera", 140, "Healing"),
+    ARRESTO_MOMENTUM("Arresto Momentum", 15, "Defensive"),
+    DISAPPEARUS("Disappearus", 43, "Defensive"),
     AGUAMENTI("Aguamenti", 4, "Combat");
     String name, spellType;
     int data;
