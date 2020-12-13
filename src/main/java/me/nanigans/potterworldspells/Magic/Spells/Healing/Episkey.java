@@ -5,6 +5,7 @@ import me.nanigans.potterworldspells.Magic.Spells.HitTypes;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Healing;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Config.JsonPaths;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -18,11 +19,11 @@ import org.bukkit.util.Vector;
 
 public class Episkey extends Healing implements SpellCasting {
     private final double spacing = 0.25;
-    private final double range = 58.5;
+    private final double range = Double.parseDouble(getData(this, JsonPaths.RANGE.path));
     private final Particle particle = Particle.REDSTONE;
-    private final double hitRad = 0.25;
+    private final double hitRad = Double.parseDouble(getData(this, JsonPaths.HITBOX.path));
     private final boolean endSpell = false;
-    private final short healAmt = 4;
+    private final short healAmt = Short.parseShort(getData(this, JsonPaths.HEALAMT.path));
     private final Particle.DustOptions color = new Particle.DustOptions(Color.MAROON, 1);
     private HitTypes hit;
     private Entity hitEnt;
@@ -30,7 +31,7 @@ public class Episkey extends Healing implements SpellCasting {
     public Episkey(Wand wand) {
         super(wand);
         player.playSound(player.getEyeLocation(), "magic.hit", 500, 1);
-        super.cooldDown = 10D;
+        super.cooldDown = Double.parseDouble(getData(this, JsonPaths.COOLDOWN.path));
         cast(range, spacing, 0, this::whileFiring, this::onHit);
         addCooldown();
     }

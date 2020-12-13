@@ -10,8 +10,6 @@ import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.Utils.Config.CustomizedObjectTypeAdapter;
 import me.nanigans.potterworldspells.Utils.Config.FilePaths;
 import me.nanigans.potterworldspells.Utils.Config.PathCreator;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;

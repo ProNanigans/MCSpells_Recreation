@@ -1,5 +1,6 @@
 package me.nanigans.potterworldspells.Utils.Config;
 
+import com.google.gson.JsonPrimitive;
 import me.nanigans.potterworldspells.PotterWorldSpells;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -18,7 +19,7 @@ public class JsonUtils {
 
     private final File jsonPath;
 
-    public JsonUtils(String path){
+    public JsonUtils(){
         jsonPath = new File(plugin.getDataFolder()+"/config.json");
     }
 

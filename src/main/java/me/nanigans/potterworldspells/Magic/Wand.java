@@ -292,7 +292,6 @@ public class Wand implements Listener {
             if(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                 closeWand();
             }
-
         }
     }
 

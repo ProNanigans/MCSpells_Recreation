@@ -1,7 +1,15 @@
 {
   "magic": {
     "spells": {
-
+      "Episkey": {
+        "range": 58.5,
+        "hitbox": 0.25,
+        "healamt": 4,
+        "cooldown": 10
+      },
+      "Feruvio": {
+        "duration": 10
+      }
     }
   }
 }

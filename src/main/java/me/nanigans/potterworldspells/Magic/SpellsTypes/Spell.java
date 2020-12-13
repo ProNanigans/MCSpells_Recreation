@@ -2,6 +2,8 @@ package me.nanigans.potterworldspells.Magic.SpellsTypes;
 
 import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.PotterWorldSpells;
+import me.nanigans.potterworldspells.Utils.Config.JsonPaths;
+import me.nanigans.potterworldspells.Utils.Config.JsonUtils;
 import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.ItemUtils;
 import org.bukkit.Location;
@@ -16,7 +18,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
@@ -30,6 +34,7 @@ abstract public class Spell implements Listener {
     protected ItemStack spell;
     protected BukkitTask task;
     protected long saveFallTime = 0;
+    protected JsonUtils data = new JsonUtils();
 
     public Spell(Wand wand){
         this.wand = wand;
@@ -217,6 +222,15 @@ abstract public class Spell implements Listener {
             }
         }.runTask(plugin);
         return ent[0];
+    }
+
+    protected String getData(Spell spell, String path) {
+        try {
+            return data.getData(JsonPaths.getSpell(spell.getClass().getSimpleName()) + "." + path).toString();
+        }catch (IOException | ParseException e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     protected Location getSpellCastLoc(){
