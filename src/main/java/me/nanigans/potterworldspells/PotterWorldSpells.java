@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import de.slikey.effectlib.EffectManager;
 import me.nanigans.potterworldspells.Commands.GiveWand;
+import me.nanigans.potterworldspells.Commands.ParticleColor;
 import me.nanigans.potterworldspells.Events.WandClickEvents;
 import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.Utils.Config.CustomizedObjectTypeAdapter;
@@ -31,6 +32,7 @@ public final class PotterWorldSpells extends JavaPlugin {
         // Plugin startup logic
 
         getCommand("wand").setExecutor(new GiveWand());
+        getCommand("particlecolor").setExecutor(new ParticleColor());
         getServer().getPluginManager().registerEvents(new WandClickEvents(), this);
         try {
             PathCreator.createPath(FilePaths.USERS.getPath());

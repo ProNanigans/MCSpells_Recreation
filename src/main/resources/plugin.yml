@@ -9,3 +9,7 @@ commands:
   wand:
     description: Gives you a new wand!
     usage: /wand
+  particlecolor:
+    description: Sets you wand particle to the given hex color value
+    usage: /particlecolor 000FFF
+    aliases: [pc, partcol, wandcolor, wc]

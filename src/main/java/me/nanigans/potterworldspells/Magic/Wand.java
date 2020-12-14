@@ -31,7 +31,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -458,8 +457,6 @@ public class Wand implements Listener {
         YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
         yaml.reloadData();
         final FileConfiguration data = yaml.getData();
-        System.out.println("data.saveToString() ===== " + data.saveToString());
-        System.out.println("data.get(YamlPaths.INVENTORIES.getPath()+\".\"+wandPage) = " + data.get(YamlPaths.INVENTORIES.getPath() + "." + wandPage));
         Map<String, Object> spells =
                 YamlGenerator.getConfigSectionValue(data.get(YamlPaths.INVENTORIES.getPath()+"."+wandPage), true);
         System.out.println("spells = " + spells);
