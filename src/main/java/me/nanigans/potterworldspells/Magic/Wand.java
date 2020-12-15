@@ -459,7 +459,6 @@ public class Wand implements Listener {
         final FileConfiguration data = yaml.getData();
         Map<String, Object> spells =
                 YamlGenerator.getConfigSectionValue(data.get(YamlPaths.INVENTORIES.getPath()+"."+wandPage), true);
-        System.out.println("spells = " + spells);
         spells = spells == null ? new HashMap<>() : spells;
 
         if (spells.size() > 0) {

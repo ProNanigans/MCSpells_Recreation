@@ -13,7 +13,7 @@ public enum Spells {
     VULNERA("Vulnera", 140, "Healing"),
     ARRESTO_MOMENTUM("Arresto Momentum", 15, "Defensive"),
     DISAPPEARUS("Disappearus", 43, "Defensive"),
-    FORTIFICUS("Fortificus", 160, "Defensive"),//TODO figure out the model data for this spell
+    FORTIFICUS("Fortificus", 183, "Defensive"),
     AGUAMENTI("Aguamenti", 4, "Combat");
     String name, spellType;
     int data;
