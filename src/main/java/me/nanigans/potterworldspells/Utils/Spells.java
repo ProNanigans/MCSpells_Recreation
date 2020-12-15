@@ -15,6 +15,7 @@ public enum Spells {
     DISAPPEARUS("Disappearus", 43, "Defensive"),
     FORTIFICUS("Fortificus", 183, "Defensive"),
     FINITE_INCANTATEM("Finite Incantatem", 60, "Defensive"),
+    FLAME_FREEZE("Flame Freeze", 56, "Defensive"),
     AGUAMENTI("Aguamenti", 4, "Combat");
     String name, spellType;
     int data;

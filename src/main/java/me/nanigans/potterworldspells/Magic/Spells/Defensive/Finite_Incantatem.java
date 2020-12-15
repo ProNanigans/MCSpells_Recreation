@@ -11,13 +11,15 @@ import org.bukkit.potion.PotionEffectType;
 public class Finite_Incantatem extends Defensive {
     public Finite_Incantatem(Wand wand) {
         super(wand);
-
+        super.cooldDown = 20D;
+        addCooldown();
         AtomEffect atom = new AtomEffect(plugin.manager);
         atom.asynchronous = true;
         atom.particleOrbital = Particle.REDSTONE;
         atom.colorOrbital = wand.getWandColor();
         atom.particleNucleus = Particle.ENCHANTMENT_TABLE;
         atom.duration = 1500;
+        atom.period = 2;
         atom.radius = 2;
         atom.setEntity(player);
         atom.start();

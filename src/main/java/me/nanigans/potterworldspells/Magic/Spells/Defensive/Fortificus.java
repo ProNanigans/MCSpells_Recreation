@@ -20,6 +20,7 @@ public class Fortificus extends Defensive {
         sphere.color = wand.getWandColor();
         sphere.radius = 2;
         sphere.type = EffectType.INSTANT;
+
         sphere.particles = 40;
         sphere.setEntity(player);
         sphere.radiusIncrease = 0;
