@@ -563,15 +563,18 @@ public class Wand implements Listener {
         System.out.println("hotbarSpellsPlacement = " + hotbarSpellsPlacement);
         wandInventory.put("Hotbars", hotbarSpellsPlacement);
         wandInventory.put("inventory", inventorySpellPlacement);
-        this.wandInventory = wandInventory
+        this.wandInventory = wandInventory;
 
         YamlGenerator yaml = new YamlGenerator(playerFile.getAbsolutePath());
         final FileConfiguration data = yaml.getData();
+
+        /* Might not need this for now
 
         wandInventory.keySet().forEach(i -> wandInventory.get(i).keySet().forEach(j ->
                 wandInventory.get(i).get(j).keySet().forEach(k ->
                         data.set(YamlPaths.SPELL_INVENTORY.getPath() + "." + i + "." + j + "." + k, wandInventory.get(i).get(j).get(k)))));
 
+         */
         Random rand = new Random();
         java.awt.Color color = new java.awt.Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat());
         data.set(YamlPaths.PARTICLECOLOR.getPath(), color.getRGB());
