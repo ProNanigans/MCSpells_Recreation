@@ -124,6 +124,13 @@ abstract public class Spell implements Listener {
 
     }
 
+    /**
+     * Reloads a spells cooldown for when it gets loaded into a players inventory
+     * @param item the item the spell is assigned to
+     * @param wand the wand the spell is on
+     * @param plugin PotterWorldSpells
+     * @param pos the inventory position the spell is found in the inventory
+     */
     public static void reloadCooldown(ItemStack item, Wand wand, PotterWorldSpells plugin, int pos) {
 
         if (ItemUtils.hasNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType())) {
@@ -166,6 +173,10 @@ abstract public class Spell implements Listener {
         }
     }
 
+    /**
+     * Prevents a player from taking fall damage depending on the spell they casted
+     * @param event
+     */
     @EventHandler
     public void fallDamage(EntityDamageEvent event){
 

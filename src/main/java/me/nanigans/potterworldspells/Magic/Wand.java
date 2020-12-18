@@ -679,6 +679,12 @@ public class Wand implements Listener {
 
     }
 
+    /**
+     * Adds cooldowns to multiple spells
+     * @param wand the wand to add the cooldowns to
+     * @param cooldown the duration of the cooldown
+     * @param items the items to add the cooldown to
+     */
     public static void addCooldowns(Wand wand, double cooldown, ItemStack... items){
 
         for(ItemStack item : items) {
