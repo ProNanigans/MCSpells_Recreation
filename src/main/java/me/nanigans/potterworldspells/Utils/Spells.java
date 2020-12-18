@@ -1,8 +1,12 @@
 package me.nanigans.potterworldspells.Utils;
 
+import me.nanigans.potterworldspells.Utils.Config.JsonPaths;
+import me.nanigans.potterworldspells.Utils.Config.JsonUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.io.IOException;
 
 public enum Spells {
 
@@ -25,6 +29,8 @@ public enum Spells {
     int data;
     int cost;
     double cooldown;
+    private final JsonUtils json = new JsonUtils();
+
 
     Spells(String name, int modelData, String spellType, int manaCost, double cooldown) {
         this.name = name;
@@ -46,7 +52,12 @@ public enum Spells {
         return item;
     }
 
-    public double getCooldown(){
+    public double getCooldown() throws IOException {
+
+        final Object data = json.getData(JsonPaths.getSpell(this.getName()) + "." + JsonPaths.COOLDOWN);
+        if(data != null) {
+            return (double) data;
+        }
         return this.cooldown;
     }
 
