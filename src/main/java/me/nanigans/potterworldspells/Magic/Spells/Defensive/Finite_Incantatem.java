@@ -4,6 +4,7 @@ import de.slikey.effectlib.effect.AtomEffect;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Defensive;
 import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.Utils.NegativeEffects;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Particle;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -11,7 +12,7 @@ import org.bukkit.potion.PotionEffectType;
 public class Finite_Incantatem extends Defensive {
     public Finite_Incantatem(Wand wand) {
         super(wand);
-        super.cooldDown = 20D;
+        super.cooldDown = Spells.FINITE_INCANTATEM.getCooldown();
         addCooldown();
         AtomEffect atom = new AtomEffect(plugin.manager);
         atom.asynchronous = true;

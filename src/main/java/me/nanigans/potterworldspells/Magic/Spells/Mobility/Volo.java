@@ -3,6 +3,7 @@ package me.nanigans.potterworldspells.Magic.Spells.Mobility;
 import de.slikey.effectlib.effect.WarpEffect;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Mobility;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Particle;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -14,7 +15,7 @@ public class Volo extends Mobility {
 
     public Volo(Wand wand) {
         super(wand);
-        super.cooldDown = 6D;
+        super.cooldDown = Spells.VOLO.getCooldown();
         player.playSound(player.getEyeLocation(), "magic.whoosh6", 1, 1);
 
         WarpEffect warp = new WarpEffect(plugin.manager);

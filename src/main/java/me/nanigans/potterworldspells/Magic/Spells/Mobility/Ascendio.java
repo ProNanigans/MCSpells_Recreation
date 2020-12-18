@@ -3,6 +3,7 @@ package me.nanigans.potterworldspells.Magic.Spells.Mobility;
 import de.slikey.effectlib.effect.TraceEffect;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Mobility;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.util.Vector;
@@ -13,7 +14,7 @@ public class Ascendio extends Mobility{
     public Ascendio(Wand wand) {
         super(wand);
 
-        super.cooldDown = 17D;
+        super.cooldDown = Spells.ASCENDIO.getCooldown();
         player.getWorld().playSound(player.getEyeLocation(), "magic.ascendio1", 2, 1);
         final Vector direction = player.getEyeLocation().getDirection();
         player.setVelocity(direction.multiply(launchAmt));

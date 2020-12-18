@@ -6,6 +6,7 @@ import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Healing;
 import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.Utils.Config.JsonPaths;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -31,7 +32,7 @@ public class Episkey extends Healing implements SpellCasting {
     public Episkey(Wand wand) {
         super(wand);
         player.playSound(player.getEyeLocation(), "magic.hit", 500, 1);
-        super.cooldDown = Double.parseDouble(getData(this, JsonPaths.COOLDOWN.path));
+        super.cooldDown = Spells.EPISKEY.getCooldown();
         cast(range, spacing, 0, this::whileFiring, this::onHit);
         addCooldown();
     }

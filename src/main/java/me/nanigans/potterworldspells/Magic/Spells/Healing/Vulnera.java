@@ -5,6 +5,7 @@ import de.slikey.effectlib.effect.WarpEffect;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Healing;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
@@ -23,7 +24,7 @@ public class Vulnera extends Healing implements SpellCasting {
 
     public Vulnera(Wand wand) {
         super(wand);
-        super.cooldDown = 40D;
+        super.cooldDown = Spells.VULNERA.getCooldown();
         cast(range, 0.5, 3, this::whileFiring, this::onHit);
         addCooldown();
     }

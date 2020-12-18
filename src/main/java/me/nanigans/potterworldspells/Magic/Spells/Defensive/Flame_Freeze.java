@@ -4,16 +4,15 @@ import de.slikey.effectlib.EffectType;
 import de.slikey.effectlib.effect.FountainEffect;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Defensive;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Particle;
 import org.bukkit.util.Vector;
 
 public class Flame_Freeze extends Defensive {
 
-    private double cooldown = 5D;
-
     public Flame_Freeze(Wand wand) {
         super(wand);
-        super.cooldDown = cooldown;
+        super.cooldDown = Spells.FLAME_FREEZE.getCooldown();
         addCooldown();
 
         FountainEffect f = new FountainEffect(plugin.manager);

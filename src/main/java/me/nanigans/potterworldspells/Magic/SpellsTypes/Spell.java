@@ -93,7 +93,7 @@ abstract public class Spell implements Listener {
     /**
      * Adds a cooldown to the spell casted and times it per second with a runnable
      */
-    protected void addCooldown(){
+    public void addCooldown(){
 
         final ItemStack lastSpell = wand.getLastSpell();
         lastSpell.setAmount((int)this.cooldDown);

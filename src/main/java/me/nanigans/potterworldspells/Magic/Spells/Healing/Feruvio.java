@@ -4,6 +4,7 @@ import de.slikey.effectlib.effect.WarpEffect;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Healing;
 import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.Utils.Config.JsonPaths;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.potion.PotionEffect;
@@ -14,7 +15,7 @@ public class Feruvio extends Healing {
     private final int duration = Integer.parseInt(getData(this, JsonPaths.DURATION.path));
     public Feruvio(Wand wand) {
         super(wand);
-        super.cooldDown = 16D;
+        super.cooldDown = Spells.FERUVIO.getCooldown();
         player.playSound(player.getEyeLocation(), "magic.heal1", 1, 1);
 
         player.playSound(player.getEyeLocation(), "magic.healwhoosh2", 1, 1);

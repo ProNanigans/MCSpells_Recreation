@@ -26,17 +26,16 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 public class Wand implements Listener {
 
@@ -46,7 +45,7 @@ public class Wand implements Listener {
     private int hotbarPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
-    private Map<String, BukkitTask> activeSpells = new HashMap<>();
+    private final Map<String, BukkitTask> activeSpells = new HashMap<>();
     private double mana = 100;
     private ItemStack lastSpell;
     public final static short maxHotBarPages = 2;
@@ -550,14 +549,7 @@ public class Wand implements Listener {
                 hotbarNum++;
             }
 
-            ItemStack item = new ItemStack(Material.DIAMOND_AXE);
-            final ItemMeta itemMeta = item.getItemMeta();
-            itemMeta.setDisplayName(value.getName());
-            itemMeta.setCustomModelData(value.getData());
-            item.setItemMeta(itemMeta);
-            System.out.println("item = " + item);
-            ItemUtils.setData(ItemUtils.setData(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType(), value.getName()),
-                    Data.SPELLTYPE.toString(), Data.SPELLTYPE.getType(), value.getSpellType());
+            ItemStack item = value.toItemStack();
 
             if (hbIndx < 9) {
                 hotbarSpells.put(hbIndx, item);
@@ -666,6 +658,33 @@ public class Wand implements Listener {
         }
     }
 
+
+    public static void addSpellCooldown(Player player, Spells... spells) throws ClassNotFoundException, NoSuchFieldException {
+
+
+        if(inWand.containsKey(player.getUniqueId())){
+            final Wand wand = inWand.get(player.getUniqueId());
+            final PlayerInventory inv = player.getInventory();
+            for (ItemStack item : inv.getStorageContents()) {
+                if(ItemUtils.hasNBT(item, Data.SPELLVALUE.toString(), Data.SPELLVALUE.getType())){
+
+                    Spells spellMatch = Spells.valueOf(ItemUtils.getNBT(item, Data.SPELLVALUE.toString(), Data.SPELLVALUE.getType()).toString());
+                    final Stream<Spells> stream = Arrays.stream(spells);
+                    if(stream.anyMatch(i -> i == spellMatch)){
+                        final Spells spellFound = stream.filter(i -> i == spellMatch).findFirst().get();
+                        Class<?> clazz = Class.forName("me.nanigans.potterworldspells.Magic.Spells."+spellFound.getSpellType()+"."+spellFound.getName());
+                        clazz.getDeclaredField("cooldown")
+                    }
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Gets the default particle color for a wand
+     * @return The color that the player has set for the wand
+     */
     public Color getWandColor(){
         YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
         final FileConfiguration data = yaml.getData();

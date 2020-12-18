@@ -3,16 +3,16 @@ package me.nanigans.potterworldspells.Magic.Spells.Defensive;
 import de.slikey.effectlib.effect.SphereEffect;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Defensive;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Particle;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class Disappearus extends Defensive {
-    private final double cooldown = 20D;
     private final int duration = 120;
     public Disappearus(Wand wand) {
         super(wand);
-        super.cooldDown = cooldown;
+        super.cooldDown = Spells.DISAPPEARUS.getCooldown();
         addCooldown();
         SphereEffect sphere = new SphereEffect(plugin.manager);
         sphere.asynchronous = true;

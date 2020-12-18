@@ -4,6 +4,7 @@ import de.slikey.effectlib.EffectType;
 import de.slikey.effectlib.effect.SphereEffect;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Defensive;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Particle;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -12,7 +13,7 @@ public class Fortificus extends Defensive {
 
     public Fortificus(Wand wand) {
         super(wand);
-        super.cooldDown = 12D;
+        super.cooldDown = Spells.FORTIFICUS.getCooldown();
         addCooldown();
         SphereEffect sphere = new SphereEffect(plugin.manager);
         sphere.asynchronous = true;

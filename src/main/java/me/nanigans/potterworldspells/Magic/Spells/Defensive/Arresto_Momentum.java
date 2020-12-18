@@ -3,13 +3,14 @@ package me.nanigans.potterworldspells.Magic.Spells.Defensive;
 import de.slikey.effectlib.effect.WarpEffect;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Defensive;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Particle;
 import org.bukkit.util.Vector;
 
 public class Arresto_Momentum extends Defensive {
     public Arresto_Momentum(Wand wand) {
         super(wand);
-        super.cooldDown = 5D;
+        super.cooldDown = Spells.ARRESTO_MOMENTUM.getCooldown();
         saveFallTime = System.currentTimeMillis()+15000;
         addCooldown();
         WarpEffect effect = new WarpEffect(plugin.manager);

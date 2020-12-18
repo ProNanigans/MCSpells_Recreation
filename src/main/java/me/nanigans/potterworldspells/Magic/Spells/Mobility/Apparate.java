@@ -7,6 +7,7 @@ import me.nanigans.potterworldspells.Magic.SpellsTypes.Mobility;
 import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.ItemUtils;
+import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -20,7 +21,6 @@ public class Apparate extends Mobility implements SpellCasting {
     private double gravity = 0;
     private double distance = 25D;
     private double spacing = 0.5;
-    protected double cooldown = 10D;
     private Particle.DustOptions color = new Particle.DustOptions(wand.getWandColor(), 1);
 
     private Particle particle = Particle.REDSTONE;
@@ -28,7 +28,7 @@ public class Apparate extends Mobility implements SpellCasting {
     public Apparate(Wand wand) {
         super(wand);
 
-            super.cooldDown = cooldown;
+            super.cooldDown = Spells.APPARATE.getCooldown();
             addCooldown();
 
             AnimatedBallEffect ball = new AnimatedBallEffect(plugin.manager);

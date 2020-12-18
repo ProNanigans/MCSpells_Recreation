@@ -10,6 +10,7 @@ public enum Data {
     PAGENUM("Page", PersistentDataType.INTEGER),
     HOTBARNUM("Hotbar_Num", PersistentDataType.INTEGER),
     SPELLTYPE("SpellType", PersistentDataType.STRING),
+    SPELLVALUE("SpellValue", PersistentDataType.STRING),
     SPELLNAME("SpellName", PersistentDataType.STRING);
 
     String name;
