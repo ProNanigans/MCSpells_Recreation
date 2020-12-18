@@ -114,13 +114,13 @@ abstract public class Spell implements Listener {
                         lastSpell.setAmount(Math.max(lastSpell.getAmount()-1, 1));
                 }else{
                     ItemUtils.removeNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
-                    wand.getActiveSpells().remove(that);
+                    wand.getActiveSpellCDS().remove(that);
                     this.cancel();
                 }
 
             }
         }.runTaskTimerAsynchronously(plugin, 20, 20);
-        this.wand.getActiveSpells().put(lastSpell.getItemMeta().getDisplayName(), task);
+        this.wand.getActiveSpellCDS().put(lastSpell.getItemMeta().getDisplayName(), (BukkitRunnable) task);
 
     }
 
@@ -156,7 +156,7 @@ abstract public class Spell implements Listener {
                     }
 
                 }.runTaskTimerAsynchronously(plugin, 20, 20);
-                wand.getActiveSpells().put(item.getItemMeta().getDisplayName(), task);
+                wand.getActiveSpellCDS().put(item.getItemMeta().getDisplayName(), (BukkitRunnable) task);
 
             }else{
                 ItemUtils.removeNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
@@ -181,8 +181,8 @@ abstract public class Spell implements Listener {
      * Removes the cooldown on a spell if it exists
      */
     public static void removeCooldown(Wand wand, String name){
-        if(wand.getActiveSpells().containsKey(name)){
-            wand.getActiveSpells().get(name).cancel();
+        if(wand.getActiveSpellCDS().containsKey(name)){
+            wand.getActiveSpellCDS().get(name).cancel();
         }
     }
 

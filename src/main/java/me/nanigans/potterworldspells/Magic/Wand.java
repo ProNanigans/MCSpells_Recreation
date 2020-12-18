@@ -29,13 +29,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 public class Wand implements Listener {
 
@@ -45,7 +43,7 @@ public class Wand implements Listener {
     private int hotbarPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
-    private final Map<String, BukkitTask> activeSpells = new HashMap<>();
+    private final Map<String, BukkitRunnable> activeSpellCDS = new HashMap<>();
     private double mana = 100;
     private ItemStack lastSpell;
     public final static short maxHotBarPages = 2;
@@ -389,7 +387,7 @@ public class Wand implements Listener {
             try {
                 ItemUtils.setData(wand, Data.PAGENUM.toString(), Data.PAGENUM.getType(), this.wandPage);
                 player.getInventory().setItemInMainHand(ItemUtils.setData(wand, Data.HOTBARNUM.toString(), Data.HOTBARNUM.getType(), this.hotbarPage));
-                this.activeSpells.forEach((i, j) -> j.cancel());
+                this.activeSpellCDS.forEach((i, j) -> j.cancel());
                 saveWandInventory();
                 saveWandHotbar();
                 inWand.remove(player.getUniqueId());
@@ -425,8 +423,8 @@ public class Wand implements Listener {
             if(file.exists()){
                 player.playSound(player.getLocation(), "magic.wanddown", 1, 1);
                 ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
-                this.activeSpells.forEach((i, j) -> j.cancel());
-                this.activeSpells.clear();
+                this.activeSpellCDS.forEach((i, j) -> j.cancel());
+                this.activeSpellCDS.clear();
                 loadPlayerItems(file);
 
             }
@@ -659,7 +657,7 @@ public class Wand implements Listener {
     }
 
 
-    public static void addSpellCooldown(Player player, Spells... spells) throws ClassNotFoundException, NoSuchFieldException {
+    public static void addSpellCooldown(Player player, Spells... spells) {
 
 
         if(inWand.containsKey(player.getUniqueId())){
@@ -669,16 +667,50 @@ public class Wand implements Listener {
                 if(ItemUtils.hasNBT(item, Data.SPELLVALUE.toString(), Data.SPELLVALUE.getType())){
 
                     Spells spellMatch = Spells.valueOf(ItemUtils.getNBT(item, Data.SPELLVALUE.toString(), Data.SPELLVALUE.getType()).toString());
-                    final Stream<Spells> stream = Arrays.stream(spells);
-                    if(stream.anyMatch(i -> i == spellMatch)){
-                        final Spells spellFound = stream.filter(i -> i == spellMatch).findFirst().get();
-                        Class<?> clazz = Class.forName("me.nanigans.potterworldspells.Magic.Spells."+spellFound.getSpellType()+"."+spellFound.getName());
-                        clazz.getDeclaredField("cooldown")
+                    if(Arrays.stream(spells).anyMatch(i -> i == spellMatch)){
+
+                        final double cooldown = spellMatch.getCooldown();
+
+
                     }
                 }
             }
         }
 
+    }
+
+    public static void addCooldowns(Wand wand, double cooldown, ItemStack... items){
+
+        for(ItemStack item : items) {
+            if(item.getAmount() > (int) cooldown) continue;
+
+            final ItemStack lastSpell = item;
+            lastSpell.setAmount((int) cooldown);
+            long time = (long) (System.currentTimeMillis() + (cooldown * 1000));
+            ItemUtils.setData(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType(), time);
+
+            BukkitRunnable task = (BukkitRunnable) new BukkitRunnable() {
+                final long spellTime = (long) ItemUtils.getNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+
+                @Override
+                public void run() {
+                    if (wand.getPlayer().getInventory().first(lastSpell) == -1) {
+                        this.cancel();
+                    }
+                    final long time = System.currentTimeMillis();
+                    if (spellTime > time) {
+                        if (lastSpell.getAmount() > 1)
+                            lastSpell.setAmount(Math.max(lastSpell.getAmount() - 1, 1));
+                    } else {
+                        ItemUtils.removeNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                        wand.getActiveSpellCDS().remove(this);
+                        this.cancel();
+                    }
+
+                }
+            }.runTaskTimerAsynchronously(wand.plugin, 20, 20);
+            wand.getActiveSpellCDS().put(lastSpell.getItemMeta().getDisplayName(), task);
+        }
     }
 
     /**
@@ -713,8 +745,8 @@ public class Wand implements Listener {
         this.mana = mana;
     }
 
-    public Map<String, BukkitTask> getActiveSpells() {
-        return activeSpells;
+    public Map<String, BukkitRunnable> getActiveSpellCDS() {
+        return activeSpellCDS;
     }
 
     /**

@@ -52,12 +52,13 @@ public enum Spells {
         return item;
     }
 
-    public double getCooldown() throws IOException {
-
-        final Object data = json.getData(JsonPaths.getSpell(this.getName()) + "." + JsonPaths.COOLDOWN);
-        if(data != null) {
-            return (double) data;
-        }
+    public double getCooldown() {
+        try {
+            final Object data = json.getData(JsonPaths.getSpell(this.getName()) + "." + JsonPaths.COOLDOWN);
+            if (data != null) {
+                return (double) data;
+            }
+        }catch (IOException ignored){}
         return this.cooldown;
     }
 
