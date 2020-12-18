@@ -456,13 +456,14 @@ public class Wand implements Listener {
         YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
         yaml.reloadData();
         final FileConfiguration data = yaml.getData();
-        Map<String, Object> spells =
-                YamlGenerator.getConfigSectionValue(data.get(YamlPaths.INVENTORIES.getPath()+"."+wandPage), true);
+        Map<?, ?> spells = wandInventory.isEmpty() ?
+                YamlGenerator.getConfigSectionValue(data.get(YamlPaths.INVENTORIES.getPath()+"."+wandPage), true) :
+                wandInventory.get("inventory").get(String.valueOf(wandPage));
         spells = spells == null ? new HashMap<>() : spells;
 
         if (spells.size() > 0) {
             spells.forEach((i, j) -> {
-                int pos = Integer.parseInt(i);
+                int pos = Integer.parseInt(i.toString());
                 ItemStack item = ((ItemStack) j).clone();
                 Spell.reloadCooldown(item, this, plugin, pos);
                 player.getInventory().setItem(pos, item);
@@ -591,6 +592,13 @@ public class Wand implements Listener {
      */
     private void saveWandInventory(){
 
+        final Map<String, Map<Integer, ItemStack>> inventory = wandInventory.get("inventory");
+        YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
+        final FileConfiguration data = yaml.getData();
+        data.set(YamlPaths.INVENTORIES.getPath(), inventory);
+        yaml.save();
+
+        /*
         ItemStack[] items = player.getInventory().getStorageContents();
         Map<Integer, ItemStack> itemStackMap = new HashMap<>();
         for(int i = 9; i < items.length; i++){
@@ -604,6 +612,7 @@ public class Wand implements Listener {
         data.set(YamlPaths.INVENTORIES.getPath()+"."+wandPage, itemStackMap);
 
         yaml.save();
+         */
     }
 
     /**
@@ -611,6 +620,13 @@ public class Wand implements Listener {
      */
     private void saveWandHotbar(){
 
+        final Map<String, Map<Integer, ItemStack>> hotbars = wandInventory.get("Hotbars");
+        YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
+        final FileConfiguration data = yaml.getData();
+        data.set(YamlPaths.INVENTORIES.getPath(), hotbars);
+        yaml.save();
+
+        /*
         ItemStack[] items = player.getInventory().getStorageContents();
         Map<Integer, ItemStack> itemStackMap = new HashMap<>();
         for(int i = 0; i < 9; i++){
@@ -622,6 +638,7 @@ public class Wand implements Listener {
         final FileConfiguration data = yaml.getData();
         data.set(YamlPaths.HOTBARS.getPath()+"."+hotbarPage, itemStackMap);
         yaml.save();
+         */
 
     }
 
