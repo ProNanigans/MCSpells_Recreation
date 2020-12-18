@@ -53,6 +53,8 @@ public class Wand implements Listener {
         put(Data.HOTBARNUM.toString(), new Integer[2]);
         put(Data.PAGENUM.toString(), new Integer[2]);
     }};
+    //Hotbar/inventory . Page Num . Location . ItemStack
+    private Map<String, Map<String, Map<Integer, ItemStack>>> wandInventory = new HashMap<>();
 
 
     public Wand(Player player){
@@ -561,6 +563,7 @@ public class Wand implements Listener {
         System.out.println("hotbarSpellsPlacement = " + hotbarSpellsPlacement);
         wandInventory.put("Hotbars", hotbarSpellsPlacement);
         wandInventory.put("inventory", inventorySpellPlacement);
+        this.wandInventory = wandInventory
 
         YamlGenerator yaml = new YamlGenerator(playerFile.getAbsolutePath());
         final FileConfiguration data = yaml.getData();
