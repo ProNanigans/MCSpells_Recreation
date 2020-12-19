@@ -5,6 +5,7 @@ import me.nanigans.potterworldspells.Utils.Config.JsonUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 
@@ -37,6 +38,7 @@ public enum Spells {
         this.data = modelData;
         this.spellType = spellType;
         this.cooldown = cooldown;
+        this.cost = manaCost;
     }
 
     public ItemStack toItemStack(){
@@ -58,7 +60,9 @@ public enum Spells {
             if (data != null) {
                 return (double) data;
             }
-        }catch (IOException ignored){}
+        }catch (IOException | ParseException ignored){
+            return this.cooldown;
+        }
         return this.cooldown;
     }
 

@@ -1,5 +1,6 @@
 package me.nanigans.potterworldspells.Magic;
 
+import de.slikey.effectlib.util.ConfigUtils;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Spell;
 import me.nanigans.potterworldspells.PotterWorldSpells;
 import me.nanigans.potterworldspells.Utils.Config.FilePaths;
@@ -12,6 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,7 +35,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class Wand implements Listener {
 
@@ -442,6 +444,48 @@ public class Wand implements Listener {
      */
 
     private void loadPlayerSpells(File fromFile){
+
+        if(this.wandInventory == null || this.wandInventory.isEmpty()) {
+            YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
+            final FileConfiguration data = yaml.getData();
+
+            final Map<String, Object> hb = YamlGenerator.getConfigSectionValue(data.get(YamlPaths.HOTBARS_PATH.getPath()), true);
+            final Map<String, Object> invs = YamlGenerator.getConfigSectionValue(data.get(YamlPaths.INVENTORIES_PATH.getPath()), true);
+
+            Map<String, Map<String, Map<Integer, ItemStack>>> inventory = new HashMap<>();
+            Map<String, Map<Integer, ItemStack>> hotbars = new HashMap<>();
+            Map<String, Map<Integer, ItemStack>> inventories = new HashMap<>();
+
+            hb.forEach((i , j) -> {
+                Map<Integer, ItemStack> hotbar = new HashMap<>();
+                final Map<String, Object> configSectionValue = YamlGenerator.getConfigSectionValue(j, true);
+                if(configSectionValue != null) {
+                    for (Map.Entry<String, Object> stringObjectEntry : configSectionValue.entrySet()) {
+                        hotbar.put(Integer.parseInt(stringObjectEntry.getKey()), (ItemStack) stringObjectEntry.getValue());
+                    }
+
+                    hotbars.put(i, hotbar);
+                }
+
+            });
+
+            invs.forEach((i , j) -> {
+                Map<Integer, ItemStack> inv = new HashMap<>();
+                final Map<String, Object> configSectionValue = YamlGenerator.getConfigSectionValue(j, true);
+                if(configSectionValue != null) {
+                    for (Map.Entry<String, Object> stringObjectEntry : configSectionValue.entrySet()) {
+                        inv.put(Integer.parseInt(stringObjectEntry.getKey()), (ItemStack) stringObjectEntry.getValue());
+                    }
+
+                    inventories.put(i, inv);
+                }
+
+            });
+            inventory.put(YamlPaths.HOTBAR.getPath(), hotbars);
+            inventory.put(YamlPaths.SPELLINV.getPath(), inventories);
+            this.wandInventory = inventory;
+        }
+
         clearAllNotWand();
         loadSpellInventory(fromFile);
         loadHotbar(fromFile);
@@ -453,22 +497,13 @@ public class Wand implements Listener {
      * @requires fromFile to exist and to be a yaml file
      */
     private void loadSpellInventory(File fromFile) {
-        YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
-        yaml.reloadData();
-        final FileConfiguration data = yaml.getData();
-        Map<?, ?> spells = wandInventory.isEmpty() ?
-                YamlGenerator.getConfigSectionValue(data.get(YamlPaths.INVENTORIES.getPath()+"."+wandPage), true) :
-                wandInventory.get("inventory").get(String.valueOf(wandPage));
-        spells = spells == null ? new HashMap<>() : spells;
 
-        if (spells.size() > 0) {
-            spells.forEach((i, j) -> {
-                int pos = Integer.parseInt(i.toString());
-                ItemStack item = ((ItemStack) j).clone();
-                Spell.reloadCooldown(item, this, plugin, pos);
-                player.getInventory().setItem(pos, item);
-            });
+
+        final Map<Integer, ItemStack> itemStackMap = this.wandInventory.get(YamlPaths.SPELLINV.getPath()).get(String.valueOf(this.wandPage));
+        for (Map.Entry<Integer, ItemStack> spells : itemStackMap.entrySet()) {
+            player.getInventory().setItem(spells.getKey(), spells.getValue());
         }
+
     }
 
     /**
@@ -478,29 +513,12 @@ public class Wand implements Listener {
      */
     private void loadHotbar(File fromFile){
 
-        YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
-        final FileConfiguration data = yaml.getData();
 
-        Map<String, Object> hotbar = YamlGenerator.getConfigSectionValue(data.get(YamlPaths.HOTBARS.getPath()+"."+hotbarPage), true);
-        hotbar = hotbar == null ? new HashMap<>() : hotbar;
-        if(hotbar.size() > 0){
-           AtomicBoolean add = new AtomicBoolean(false);
-
-            hotbar.forEach((i, j) -> {
-                int pos = Integer.parseInt(i);
-                if(add.get()) pos++;
-                if(pos < 9){
-                    int handPos = player.getInventory().getHeldItemSlot();
-                    if(pos == handPos) {
-                        pos = player.getInventory().firstEmpty();
-                        add.set(true);
-                    }
-                }
-                ItemStack item = ((ItemStack) j);
-                player.getInventory().setItem(pos, item);
-                Spell.reloadCooldown(item, this, plugin, pos);
-            });
+        final Map<Integer, ItemStack> itemStackMap = this.wandInventory.get(YamlPaths.HOTBAR.getPath()).get(String.valueOf(this.hotbarPage));
+        for (Map.Entry<Integer, ItemStack> spells : itemStackMap.entrySet()) {
+            player.getInventory().setItem(spells.getKey(), spells.getValue());
         }
+
     }
 
     /**
@@ -512,8 +530,9 @@ public class Wand implements Listener {
 
         YamlGenerator yaml = new YamlGenerator(fromFile.getAbsolutePath());
         final FileConfiguration data = yaml.getData();
+
         final Map<String, Object> playerItems = YamlGenerator.getConfigSectionValue(data
-                .get(YamlPaths.INVENTORY.getPath()), true);
+                .get(YamlPaths.INVENTORIES_PATH.getPath()), false);
         clearAllNotWand();
         if(playerItems != null && playerItems.size() > 0){
             playerItems.forEach((i, j) -> player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j));
@@ -561,7 +580,7 @@ public class Wand implements Listener {
         }
         inventorySpellPlacement.put(String.valueOf(invNum), inventorySpells);
         hotbarSpellsPlacement.put(String.valueOf(hotbarNum), hotbarSpells);
-        System.out.println("hotbarSpellsPlacement = " + hotbarSpellsPlacement);
+        //System.out.println("hotbarSpellsPlacement = " + hotbarSpellsPlacement);
         wandInventory.put("Hotbars", hotbarSpellsPlacement);
         wandInventory.put("inventory", inventorySpellPlacement);
         this.wandInventory = wandInventory;
@@ -595,7 +614,7 @@ public class Wand implements Listener {
         final Map<String, Map<Integer, ItemStack>> inventory = wandInventory.get("inventory");
         YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
         final FileConfiguration data = yaml.getData();
-        data.set(YamlPaths.INVENTORIES.getPath(), inventory);
+        data.set(YamlPaths.INVENTORIES_PATH.getPath(), inventory);
         yaml.save();
 
         /*
@@ -623,7 +642,7 @@ public class Wand implements Listener {
         final Map<String, Map<Integer, ItemStack>> hotbars = wandInventory.get("Hotbars");
         YamlGenerator yaml = new YamlGenerator(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml");
         final FileConfiguration data = yaml.getData();
-        data.set(YamlPaths.INVENTORIES.getPath(), hotbars);
+        data.set(YamlPaths.HOTBARS_PATH.getPath(), hotbars);
         yaml.save();
 
         /*
