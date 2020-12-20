@@ -1,6 +1,5 @@
 package me.nanigans.potterworldspells.Magic;
 
-import de.slikey.effectlib.util.ConfigUtils;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Spell;
 import me.nanigans.potterworldspells.PotterWorldSpells;
 import me.nanigans.potterworldspells.Utils.Config.FilePaths;
@@ -13,7 +12,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,7 +33,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Wand implements Listener {
 
@@ -86,6 +83,7 @@ public class Wand implements Listener {
             spellRightClicked(event);
             dropInventorySpell(event);
             moveItem(event);
+            updateWand();
         }
 
     }
@@ -127,6 +125,30 @@ public class Wand implements Listener {
             }
         }
 
+    }
+
+    /**
+     * Updates the wand inventory to what the players inventory is
+     */
+    public void updateWand(){
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                final Map<Integer, ItemStack> inventory = new HashMap<>();
+                final Map<Integer, ItemStack> hotbar = new HashMap<>();
+                final ItemStack[] storageContents = player.getInventory().getStorageContents();
+                for (int i = 0; i < storageContents.length; i++) {
+                    if(i < 9){
+                        hotbar.put(i, storageContents[i]);
+                    }else{
+                        inventory.put(i, storageContents[i]);
+                    }
+                }
+                wandInventory.get(YamlPaths.SPELLINV.getPath()).put(String.valueOf(wandPage), inventory);
+                wandInventory.get(YamlPaths.HOTBAR.getPath()).put(String.valueOf(hotbarPage), hotbar);
+            }
+        }.runTaskAsynchronously(plugin);
     }
 
     /**
@@ -226,7 +248,7 @@ public class Wand implements Listener {
                 }
                 player.playSound(player.getEyeLocation(), "magic.paperturn", 1, 1);
                 clearInventory();
-                loadSpellInventory(new File(FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml"));
+                loadSpellInventory();
 
             }
 
@@ -277,7 +299,7 @@ public class Wand implements Listener {
                 else hotbarPage--;
             }
             clearHotBar();
-            loadHotbar(new File(FilePaths.USERS.getPath() + "/" + player.getUniqueId() + ".yml"));
+            loadHotbar();
 
         }
 
@@ -423,7 +445,6 @@ public class Wand implements Listener {
                 setUpInventory();
             }
         }else{
-
             if(file.exists()){
                 player.playSound(player.getLocation(), "magic.wanddown", 1, 1);
                 ItemUtils.saveInventory(player, FilePaths.USERS.getPath()+"/"+player.getUniqueId()+".yml", YamlPaths.INVENTORY.getPath(), wand);
@@ -487,36 +508,35 @@ public class Wand implements Listener {
         }
 
         clearAllNotWand();
-        loadSpellInventory(fromFile);
-        loadHotbar(fromFile);
+        loadSpellInventory();
+        loadHotbar();
     }
 
     /**
      * Loads a players inventory from the current page
-     * @param fromFile the yaml file to the inventory from
      * @requires fromFile to exist and to be a yaml file
      */
-    private void loadSpellInventory(File fromFile) {
-
+    private void loadSpellInventory() {
 
         final Map<Integer, ItemStack> itemStackMap = this.wandInventory.get(YamlPaths.SPELLINV.getPath()).get(String.valueOf(this.wandPage));
         for (Map.Entry<Integer, ItemStack> spells : itemStackMap.entrySet()) {
             player.getInventory().setItem(spells.getKey(), spells.getValue());
+            Spell.reloadCooldown(spells.getValue(), this, plugin, spells.getKey());
         }
 
     }
 
     /**
      * Loads a players hotbar from the current page
-     * @param fromFile the yaml file to get the hotbar from
      * @requires fromFile to exist and to be a yaml file
      */
-    private void loadHotbar(File fromFile){
+    private void loadHotbar(){
 
 
         final Map<Integer, ItemStack> itemStackMap = this.wandInventory.get(YamlPaths.HOTBAR.getPath()).get(String.valueOf(this.hotbarPage));
         for (Map.Entry<Integer, ItemStack> spells : itemStackMap.entrySet()) {
             player.getInventory().setItem(spells.getKey(), spells.getValue());
+            Spell.reloadCooldown(spells.getValue(), this, plugin, spells.getKey());
         }
 
     }
@@ -534,8 +554,9 @@ public class Wand implements Listener {
         final Map<String, Object> playerItems = YamlGenerator.getConfigSectionValue(data
                 .get(YamlPaths.INVENTORIES_PATH.getPath()), false);
         clearAllNotWand();
+        System.out.println("playerItems = " + playerItems);
         if(playerItems != null && playerItems.size() > 0){
-            playerItems.forEach((i, j) -> player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j));
+            //playerItems.forEach((i, j) -> player.getInventory().setItem(Integer.parseInt(i), (ItemStack) j));
         }
 
     }

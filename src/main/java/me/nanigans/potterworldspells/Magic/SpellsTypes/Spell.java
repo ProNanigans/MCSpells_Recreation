@@ -32,7 +32,7 @@ abstract public class Spell implements Listener {
     protected Player player;
     protected PotterWorldSpells plugin;
     protected ItemStack spell;
-    protected BukkitTask task;
+    protected BukkitRunnable task;
     protected long saveFallTime = 0;
     protected JsonUtils data = new JsonUtils();
 
@@ -99,9 +99,10 @@ abstract public class Spell implements Listener {
         lastSpell.setAmount((int)this.cooldDown);
         long time = (long) (System.currentTimeMillis() + (this.cooldDown*1000));
         ItemUtils.setData(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType(), time);
+        wand.updateWand();
 
         final Spell that = this;
-        this.task = new BukkitRunnable() {
+        BukkitRunnable task = new BukkitRunnable() {
             final long spellTime = (long) ItemUtils.getNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
             @Override
             public void run() {
@@ -114,13 +115,16 @@ abstract public class Spell implements Listener {
                         lastSpell.setAmount(Math.max(lastSpell.getAmount()-1, 1));
                 }else{
                     ItemUtils.removeNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                    wand.updateWand();
                     wand.getActiveSpellCDS().remove(that);
                     this.cancel();
                 }
 
             }
-        }.runTaskTimerAsynchronously(plugin, 20, 20);
-        this.wand.getActiveSpellCDS().put(lastSpell.getItemMeta().getDisplayName(), (BukkitRunnable) task);
+        };
+        task.runTaskTimerAsynchronously(plugin, 20, 20);
+        this.task = task;
+        this.wand.getActiveSpellCDS().put(lastSpell.getItemMeta().getDisplayName(), task);
 
     }
 
@@ -143,7 +147,7 @@ abstract public class Spell implements Listener {
                 int amount = (int) Math.ceil(remainingTime/1000D);
                 if(amount > 1)
                 item.setAmount(amount);
-                BukkitTask task = new BukkitRunnable() {
+                BukkitRunnable task = new BukkitRunnable() {
                     @Override
                     public void run() {
                         if (wand.getPlayer().getInventory().first(item) == -1) {
@@ -157,13 +161,15 @@ abstract public class Spell implements Listener {
                             }
                         } else {
                             ItemUtils.removeNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+                            wand.updateWand();
                             wand.getPlayer().getInventory().setItem(pos, item);
                             this.cancel();
                         }
                     }
 
-                }.runTaskTimerAsynchronously(plugin, 20, 20);
-                wand.getActiveSpellCDS().put(item.getItemMeta().getDisplayName(), (BukkitRunnable) task);
+                };
+                task.runTaskTimerAsynchronously(plugin, 20, 20);
+                wand.getActiveSpellCDS().put(item.getItemMeta().getDisplayName(), task);
 
             }else{
                 ItemUtils.removeNBT(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());

@@ -56,7 +56,6 @@ public class ItemUtils {
     public static void saveInventory(Player player, String path, String yamlPath, ItemStack... ignored){
 
         YamlGenerator yaml = new YamlGenerator(path);
-        final FileConfiguration data = yaml.getData();
         Map<Integer, ItemStack> saveMap = new HashMap<>();
         final ItemStack[] storageContents = player.getInventory().getStorageContents();
         for (int i = 0; i < storageContents.length; i++) {
@@ -65,7 +64,7 @@ public class ItemUtils {
                 saveMap.put(i, storageContents[i]);
             }
         }
-        data.set(yamlPath, saveMap);
+        yaml.getData().set(yamlPath, saveMap);
         yaml.save();
 
     }
