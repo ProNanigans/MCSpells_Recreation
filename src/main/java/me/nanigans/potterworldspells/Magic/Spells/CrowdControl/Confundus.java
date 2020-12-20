@@ -12,7 +12,6 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -37,28 +36,31 @@ public class Confundus extends Crowd_Control implements SpellCasting {
         hitLoc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, hitLoc, 20, 0, 0, 0, 0.3);
         hitLoc.getWorld().playSound(hitLoc, "magic.hit", 100, 1);
 
-        if(hitEnt instanceof LivingEntity){
-            LivingEntity ent = (LivingEntity) hitEnt;
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    ent.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 160, 2));
-                }
-            }.runTask(plugin);
-            hitLoc.getWorld().playSound(hitLoc, "magic.evilwhoosh3", 100, 1);
-            hitLoc.getWorld().playSound(hitLoc, Sound.ENTITY_VILLAGER_HURT, 100, 1);
+        if(hit != null && hit == HitTypes.ENTITY) {
 
-            AnimatedBallEffect effect = new AnimatedBallEffect(plugin.manager);
-            effect.setEntity(ent);
-            effect.asynchronous = true;
-            effect.color = Color.fromRGB(0, 0, 128);
-            effect.particle = Particle.REDSTONE;
-            effect.duration = 8000;
-            effect.offset = new Vector(0, -1, 0);
-            effect.start();
+            if (hitEnt instanceof LivingEntity) {
+                LivingEntity ent = (LivingEntity) hitEnt;
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        ent.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 160, 2));
+                    }
+                }.runTask(plugin);
+                hitLoc.getWorld().playSound(hitLoc, "magic.evilwhoosh3", 100, 1);
+                hitLoc.getWorld().playSound(hitLoc, Sound.ENTITY_VILLAGER_HURT, 100, 1);
+
+                AnimatedBallEffect effect = new AnimatedBallEffect(plugin.manager);
+                effect.setEntity(ent);
+                effect.asynchronous = true;
+                effect.color = Color.fromRGB(0, 0, 128);
+                effect.particle = Particle.REDSTONE;
+                effect.duration = 8000;
+                effect.offset = new Vector(0, -1, 0);
+                effect.start();
+
+            }
 
         }
-
     }
 
     @Override
@@ -80,6 +82,7 @@ public class Confundus extends Crowd_Control implements SpellCasting {
                 if(entity instanceof LivingEntity && !((LivingEntity) entity).hasPotionEffect(PotionEffectType.DAMAGE_RESISTANCE)){
                     if(entity.getBoundingBox().expand(0.15).contains(p1)){
                         hitEnt = entity;
+                        hit = HitTypes.ENTITY;
                         return loc;
                     }
                 }

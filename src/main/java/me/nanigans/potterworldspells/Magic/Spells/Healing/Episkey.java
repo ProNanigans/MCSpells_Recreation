@@ -93,6 +93,7 @@ public class Episkey extends Healing implements SpellCasting {
             if(entity instanceof LivingEntity && !((LivingEntity) entity).hasPotionEffect(PotionEffectType.DAMAGE_RESISTANCE)){
                 if(entity.getBoundingBox().expand(hitRad).contains(p1)){
                     hitEnt = entity;
+                    hit = HitTypes.ENTITY;
                     return loc;
                 }
             }
