@@ -19,6 +19,7 @@ public class Accio extends Crowd_Control implements SpellCasting {
 
     public Accio(Wand wand) {
         super(wand);
+        super.cooldDown = 12D;
         double distance = 30D;
         ending = player.getLocation().add(player.getLocation().getDirection().multiply(distance)).toVector();
         double spacing = 0.5;
@@ -26,6 +27,7 @@ public class Accio extends Crowd_Control implements SpellCasting {
         player.getWorld().playSound(player.getLocation(), "magic.whip2", 100, 1);
         ignoreCancel = true;
         super.cast(distance, spacing, speed, this::whileFiring, this::onHit);
+        addCooldown();
     }
 
     @Override
