@@ -83,7 +83,7 @@ public class Episkey extends Healing implements SpellCasting {
         Location loc = p1.toLocation(player.getWorld());
         final Block blockAt = player.getWorld().getBlockAt(loc);
         if(blockAt.getType().isSolid()){
-            hit = HitTypes.ENTITY;
+            hit = HitTypes.BLOCK;
             return loc;
         }
 
@@ -100,7 +100,7 @@ public class Episkey extends Healing implements SpellCasting {
 
         if(endSpell) return loc;
 
-        p1.add(vector.subtract(new Vector(0, 0, 0)));
+        p1.add(vector);
 
         return null;
     }

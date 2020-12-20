@@ -25,6 +25,7 @@ public enum Spells {
     FORTIFICUS("Fortificus", 183, "Defensive", 0, 12D),
     FINITE_INCANTATEM("Finite Incantatem", 60, "Defensive", 0, 20D),
     FLAME_FREEZE("Flame Freeze", 56, "Defensive", 0, 5D),
+    PROTEGO("Protego", 112, "Defensive", 0, 0D),
     AGUAMENTI("Aguamenti", 4, "Combat", 0, 0D);
     String name, spellType;
     int data;

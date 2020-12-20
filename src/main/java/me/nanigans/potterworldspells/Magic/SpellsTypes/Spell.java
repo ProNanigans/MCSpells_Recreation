@@ -15,7 +15,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.json.simple.parser.ParseException;
@@ -35,6 +34,7 @@ abstract public class Spell implements Listener {
     protected BukkitRunnable task;
     protected long saveFallTime = 0;
     protected JsonUtils data = new JsonUtils();
+    protected boolean ignoreCancel = false;
 
     public Spell(Wand wand){
         this.wand = wand;
@@ -47,15 +47,15 @@ abstract public class Spell implements Listener {
     /**
      * Casts the spell. This will only create a loop between two points and will not increment the current position. You will
      * have to do this yourself
-     * @param length the distance the spell will travel
+     * @param castDistance the distance the spell will travel
      * @param spacing the spacing per particle
      * @param speed the speed of the particle
      * @param locCb the callback for when the spell is firing
      * @param endCb when the spell has hit something or has reached its max distance
      * @requires speed >= 0
      */
-    protected void cast(double length, double spacing, final long speed, Callback locCb, Consumer<Location> endCb){
-        Location p2 = player.getLocation().add(player.getLocation().getDirection().multiply(length));
+    protected void cast(double castDistance, double spacing, final long speed, Callback locCb, Consumer<Location> endCb){
+        Location p2 = player.getLocation().add(player.getLocation().getDirection().multiply(castDistance));
         double distance = getSpellCastLoc().distance(p2);
         Vector p1 = getSpellCastLoc().toVector();
         Vector vector = p2.toVector().clone().subtract(p1).normalize().multiply(spacing);
@@ -77,7 +77,8 @@ abstract public class Spell implements Listener {
                     final Location call = locCb.call(p1, vector);
                     if(call != null){
                         endCb.accept(call);
-                        break;
+                        if(!ignoreCancel)
+                            break;
                     }
                 }
                 endCb.accept(p1.toLocation(player.getWorld()));
