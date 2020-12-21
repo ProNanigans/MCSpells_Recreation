@@ -80,8 +80,10 @@ abstract public class Spell implements Listener {
                     final Location call = locCb.call(p1, vector);
                     if(call != null){
                         endCb.accept(call);
-                        if(!ignoreCancel)
-                            break;
+                        if(!ignoreCancel) {
+                            this.cancel();
+                            return;
+                        }
                     }
                 }
                 endCb.accept(p1.toLocation(player.getWorld()));
