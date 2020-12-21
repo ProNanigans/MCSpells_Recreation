@@ -16,6 +16,7 @@ public enum Spells {
     CONFUNDUS("Confundus", 30, "CrowdControl", 0, 23D),
     DEPULSO("Depulso", 149, "CrowdControl", 0, 5D),
     EXPELLIARMUS("Expelliarmus", 51, "CrowdControl", 0, 17D),
+    FLIPENDO("Flipendo", 68, "CrowdControl", 0, 2D),
     APPARATE("Apparate", 9, "Mobility", 0, 20D),
     ASCENDIO("Ascendio", 14, "Mobility", 0, 17D),
     TRIPUDIO("Tripudo", 181, "Mobility", 0, 6D),

@@ -34,6 +34,7 @@ public class Expelliarmus extends Crowd_Control implements SpellCasting {
     @Override
     public void onHit(Location hitLoc) {
         player.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, hitLoc, 5, 0, 0, 0, 0.1);
+        hitLoc.getWorld().playSound(hitLoc, "magic.hit", 100, 1);
 
         if(hit != null && hit == HitTypes.ENTITY){
 
@@ -46,7 +47,6 @@ public class Expelliarmus extends Crowd_Control implements SpellCasting {
             ball.yFactor = 1.5F;
             ball.particle = Particle.REDSTONE;
             ball.start();
-            hitEnt.getWorld().playSound(hitEnt.getLocation(), "magic.hit", 100, 1);
 
             if(hitEnt instanceof Player){
 
@@ -63,7 +63,7 @@ public class Expelliarmus extends Crowd_Control implements SpellCasting {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        pHit.damage(0);
+                        pHit.damage(0.1);
                     }
                 }.runTask(plugin);
 

@@ -98,7 +98,7 @@ abstract public class Spell implements Listener {
     public static boolean reflectSpell(Block blockAt, Player player, Vector p1, Vector vector){
 
         final BlockFace face = blockAt.getFace(player.getWorld().getBlockAt(p1.subtract(vector).toLocation(player.getWorld())));
-        if(face.getDirection() != null) {
+        if(face != null && face.getDirection() != null) {
             final double dot = vector.dot(face.getDirection());
             final Vector r = vector.subtract(face.getDirection().multiply(2 * dot));
             vector.setX(r.getX());

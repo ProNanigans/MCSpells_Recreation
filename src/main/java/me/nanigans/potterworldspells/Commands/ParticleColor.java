@@ -29,8 +29,7 @@ public class ParticleColor implements CommandExecutor {
                         File file = new File(FilePaths.USERS+"/"+player.getUniqueId()+".yml");
                         if(file.exists()){
                             YamlGenerator yaml = new YamlGenerator(file.getAbsolutePath());
-                            final FileConfiguration data = yaml.getData();
-                            data.set(YamlPaths.PARTICLECOLOR.getPath(), color.getRGB());
+                            yaml.getData().set(YamlPaths.PARTICLECOLOR.getPath(), color.getRGB());
                             yaml.save();
 
                             player.sendMessage(ChatColor.GREEN+"Color changed!");
