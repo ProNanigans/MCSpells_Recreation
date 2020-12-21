@@ -13,7 +13,9 @@ public enum Spells {
 
     ANTI_APPARATE("Anti Apparate", 2, "CrowdControl", 20, 20D),//name, custom model data
     ACCIO("Accio", 3, "CrowdControl", 0, 12D),
-    CONFUNDUS("Confundus", 30, "CrowdControl", 0, 23),
+    CONFUNDUS("Confundus", 30, "CrowdControl", 0, 23D),
+    DEPULSO("Depulso", 149, "CrowdControl", 0, 5D),
+    EXPELLIARMUS("Expelliarmus", 51, "CrowdControl", 0, 17D),
     APPARATE("Apparate", 9, "Mobility", 0, 20D),
     ASCENDIO("Ascendio", 14, "Mobility", 0, 17D),
     TRIPUDIO("Tripudo", 181, "Mobility", 0, 6D),
