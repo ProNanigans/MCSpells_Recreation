@@ -72,6 +72,13 @@ public class Confundus extends Crowd_Control implements SpellCasting {
 
         final Block blockAt = player.getWorld().getBlockAt(loc);
         if(blockAt.getType().isSolid()){
+
+            if(blockAt.hasMetadata("Protego")){
+                if (reflectSpell(blockAt, player, p1, vector)) {
+                    return null;
+                }
+            }
+
             hit = HitTypes.BLOCK;
             return loc;
         }
@@ -91,4 +98,5 @@ public class Confundus extends Crowd_Control implements SpellCasting {
         p1.add(vector);
         return null;
     }
+
 }

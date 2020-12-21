@@ -7,6 +7,8 @@ import me.nanigans.potterworldspells.Utils.Config.JsonUtils;
 import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.ItemUtils;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -89,6 +91,22 @@ abstract public class Spell implements Listener {
 
     public interface Callback{
         Location call(Vector p1, Vector vector);
+    }
+
+
+    public static boolean reflectSpell(Block blockAt, Player player, Vector p1, Vector vector){
+
+        final BlockFace face = blockAt.getFace(player.getWorld().getBlockAt(p1.subtract(vector).toLocation(player.getWorld())));
+        if(face.getDirection() != null) {
+            final double dot = vector.dot(face.getDirection());
+            final Vector r = vector.subtract(face.getDirection().multiply(2 * dot));
+            vector.setX(r.getX());
+            vector.setY(r.getY());
+            vector.setZ(r.getZ());
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /**

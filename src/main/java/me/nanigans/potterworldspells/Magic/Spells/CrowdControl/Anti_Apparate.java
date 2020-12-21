@@ -53,6 +53,13 @@ public class Anti_Apparate extends Crowd_Control implements SpellCasting {
         final Location location = p1.toLocation(player.getWorld());
         final Block blockAt = player.getWorld().getBlockAt(location);
         if(blockAt.getType().isSolid()){
+
+            if(blockAt.hasMetadata("Protego")){
+                if (reflectSpell(blockAt, player, p1, vector)) {
+                    return null;
+                }
+            }
+
             hit = HitTypes.BLOCK;
             return location;
         }
