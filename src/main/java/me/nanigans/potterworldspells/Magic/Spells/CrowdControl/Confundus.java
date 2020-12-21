@@ -24,7 +24,7 @@ public class Confundus extends Crowd_Control implements SpellCasting {
     public Confundus(Wand wand) {
         super(wand);
 
-        double distance = 39D;
+        double distance = 100D;
         double spacing = 0.25;
         long speed = 1;
         super.cast(distance, spacing, speed, this::whileFiring, this::onHit);
@@ -75,6 +75,7 @@ public class Confundus extends Crowd_Control implements SpellCasting {
 
             if(blockAt.hasMetadata("Protego")){
                 if (reflectSpell(blockAt, player, p1, vector)) {
+                    canHitCaster = true;
                     return null;
                 }
             }
@@ -85,7 +86,7 @@ public class Confundus extends Crowd_Control implements SpellCasting {
 
         final Entity[] entities = loc.getWorld().getChunkAt(loc).getEntities();
         for (Entity entity : entities) {
-            if(!entity.equals(player))
+            if(canHitCaster || !entity.equals(player))
                 if(entity instanceof LivingEntity && !((LivingEntity) entity).hasPotionEffect(PotionEffectType.DAMAGE_RESISTANCE)){
                     if(entity.getBoundingBox().expand(0.15).contains(p1)){
                         hitEnt = entity;

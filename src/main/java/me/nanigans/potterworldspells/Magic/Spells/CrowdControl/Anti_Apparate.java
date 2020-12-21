@@ -17,6 +17,9 @@ public class Anti_Apparate extends Crowd_Control implements SpellCasting {
 
     private HitTypes hit;
     private Entity hitEnt;
+    private final double red = 105 / 255D;
+    private final double green = 105 / 255D;
+    private final double blue = 105 / 255D;
 
     public Anti_Apparate(Wand wand) {
         super(wand);
@@ -34,9 +37,10 @@ public class Anti_Apparate extends Crowd_Control implements SpellCasting {
 
         hitLoc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, hitLoc, 20, 0, 0, 0, 0.3);
         player.getWorld().playSound(hitLoc, "magic.hit", 100, 1);
-
-        if(hitEnt instanceof Player){
-            //TODO figure out forced player spell cooldowns
+        if(hit == HitTypes.ENTITY) {
+            if (hitEnt instanceof Player) {
+                //TODO figure out forced player spell cooldowns
+            }
         }
 
     }
@@ -44,9 +48,6 @@ public class Anti_Apparate extends Crowd_Control implements SpellCasting {
     @Override
     public Location whileFiring(Vector p1, Vector vector) {
 
-        double red = 105 / 255D;
-        double green = 105 / 255D;
-        double blue = 105 / 255D;
         player.getWorld().spawnParticle(Particle.SPELL_MOB, p1.toLocation(player.getWorld()), 0, red, green, blue);
         player.getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE, p1.getX(), p1.getY(), p1.getZ(), 0, 0, 0, 0);
 
@@ -66,7 +67,7 @@ public class Anti_Apparate extends Crowd_Control implements SpellCasting {
 
         final Entity[] entities = location.getWorld().getChunkAt(location).getEntities();
         for (Entity entity : entities) {
-            if(!entity.equals(player))
+            if(canHitCaster || !entity.equals(player))
                 if(entity instanceof LivingEntity && !((LivingEntity) entity).hasPotionEffect(PotionEffectType.DAMAGE_RESISTANCE)){
                     if(entity.getBoundingBox().expand(0.12).contains(p1)){
                         hitEnt = entity;

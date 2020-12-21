@@ -37,6 +37,7 @@ abstract public class Spell implements Listener {
     protected long saveFallTime = 0;
     protected JsonUtils data = new JsonUtils();
     protected boolean ignoreCancel = false;
+    protected boolean canHitCaster = false;
 
     public Spell(Wand wand){
         this.wand = wand;
