@@ -19,6 +19,7 @@ public enum Spells {
     FLIPENDO("Flipendo", 68, "CrowdControl", 0, 2D),
     IMMOBULUS("Immobulus", 73, "CrowdControl", 0, 20D),
     INCARCERUM("Incarcerum", 76, "CrowdControl", 0, 22D),
+    LEVICORPUS("Levicorpus", 86, "CrowdControl", 0, 18D),
     APPARATE("Apparate", 9, "Mobility", 0, 20D),
     ASCENDIO("Ascendio", 14, "Mobility", 0, 17D),
     TRIPUDIO("Tripudo", 181, "Mobility", 0, 6D),

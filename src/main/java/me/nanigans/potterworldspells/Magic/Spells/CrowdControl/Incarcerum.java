@@ -4,7 +4,6 @@ import me.nanigans.potterworldspells.Magic.Spells.HitTypes;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Crowd_Control;
 import me.nanigans.potterworldspells.Magic.Wand;
-import me.nanigans.potterworldspells.Utils.ItemUtils;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,22 +15,17 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 public class Incarcerum extends Crowd_Control implements SpellCasting {
     //the rope is diamond shovel with model data of 372 on head
 
-    private static final ItemStack itemCrackData = new ItemStack(Material.OAK_PLANKS);
     private HitTypes hit;
     private Entity hitEnt;
+    private final static BlockData fallingDustData = Material.BIRCH_PLANKS.createBlockData();
 
     public Incarcerum(Wand wand) {
         super(wand);
@@ -100,7 +94,6 @@ public class Incarcerum extends Crowd_Control implements SpellCasting {
     public Location whileFiring(Vector p1, Vector vector) {
 
         final Location loc = p1.toLocation(player.getWorld());
-        BlockData fallingDustData = Material.BIRCH_PLANKS.createBlockData();
         player.spawnParticle(Particle.BLOCK_CRACK, loc, 4, .05, .05, .05, fallingDustData);
 
         player.spawnParticle(Particle.REDSTONE, p1.getX(), p1.getY(), p1.getZ(),2, 0, 0, 0,
