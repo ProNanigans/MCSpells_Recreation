@@ -5,6 +5,7 @@ import me.nanigans.potterworldspells.Magic.Spells.HitTypes;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Crowd_Control;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Data;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -65,7 +66,7 @@ public class Alarte extends Crowd_Control implements SpellCasting {
         final Block blockAt = player.getWorld().getBlockAt(location);
         if(blockAt.getType().isSolid()){
 
-            if(blockAt.hasMetadata("Protego")){
+            if(blockAt.hasMetadata(Data.REFLECT.toString())){
                 if (reflectSpell(blockAt, player, p1, vector)) {
                     canHitCaster = true;
                     return null;

@@ -11,7 +11,9 @@ public enum Data {
     HOTBARNUM("Hotbar_Num", PersistentDataType.INTEGER),
     SPELLTYPE("SpellType", PersistentDataType.STRING),
     SPELLVALUE("SpellValue", PersistentDataType.STRING),
-    SPELLNAME("SpellName", PersistentDataType.STRING);
+    SPELLNAME("SpellName", PersistentDataType.STRING),
+    REFLECT("Reflect", null),
+    SPREAD("Spread", null);
 
     String name;
     String spellType;

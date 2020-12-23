@@ -26,6 +26,8 @@ public enum Spells {
     VENTUS("Ventus", 64, "CrowdControl", 0, 15D),
     ALARTE("Alarte", 67, "CrowdControl", 0, 5D),
     CONJUNCTIVITIS("Conjunctivitis", 32, "CrowdControl", 0, 20D),
+    AGUAMENTI("Aquamenti", 4, "Utility", 0, 5D),
+    ALOHOMORA("Alohomora", 6, "Utility", 0, 5D),
     APPARATE("Apparate", 9, "Mobility", 0, 20D),
     ASCENDIO("Ascendio", 14, "Mobility", 0, 17D),
     TRIPUDIO("Tripudo", 181, "Mobility", 0, 6D),
@@ -38,8 +40,7 @@ public enum Spells {
     FORTIFICUS("Fortificus", 183, "Defensive", 0, 12D),
     FINITE_INCANTATEM("Finite Incantatem", 60, "Defensive", 0, 20D),
     FLAME_FREEZE("Flame Freeze", 56, "Defensive", 0, 5D),
-    PROTEGO("Protego", 112, "Defensive", 0, 0D),
-    AGUAMENTI("Aguamenti", 4, "Combat", 0, 0D);
+    PROTEGO("Protego", 112, "Defensive", 0, 0D);
     String name, spellType;
     int data;
     int cost;
