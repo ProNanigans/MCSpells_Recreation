@@ -8,6 +8,7 @@ import me.nanigans.potterworldspells.Magic.Wand;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -63,7 +64,7 @@ public class Expelliarmus extends Crowd_Control implements SpellCasting {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        pHit.damage(0.1);
+                        pHit.playSound(pHit.getLocation(), Sound.ENTITY_PLAYER_HURT, 100, 1);
                     }
                 }.runTask(plugin);
 

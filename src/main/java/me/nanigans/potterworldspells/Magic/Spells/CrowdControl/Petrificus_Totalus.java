@@ -9,6 +9,7 @@ import me.nanigans.potterworldspells.Magic.SpellsTypes.Crowd_Control;
 import me.nanigans.potterworldspells.Magic.Wand;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -80,7 +81,7 @@ public class Petrificus_Totalus extends Crowd_Control implements SpellCasting {
                         hitEnt.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 80, 100));
                         if(hitEnt instanceof Player)
                             hitEnt.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 80, 250));
-                        hitEnt.damage(0.1);
+                        hitEnt.getWorld().playSound(hitEnt.getLocation(), Sound.ENTITY_PLAYER_HURT, 100, 1);
                     }
                 }.runTask(plugin);
 

@@ -9,6 +9,7 @@ import me.nanigans.potterworldspells.Magic.Wand;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -66,7 +67,7 @@ public class Levicorpus extends Crowd_Control implements SpellCasting {
                     new BukkitRunnable() {
                         @Override
                         public void run() {
-                            ent.damage(0.1);
+                            ent.getWorld().playSound(ent.getLocation(), Sound.ENTITY_PLAYER_HURT, 100, 1);
                             ent.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 140, 1));
                         }
                     }.runTask(plugin);

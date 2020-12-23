@@ -1,6 +1,5 @@
 package me.nanigans.potterworldspells.Magic.Spells.CrowdControl;
 
-import de.slikey.effectlib.effect.AnimatedBallEffect;
 import me.nanigans.potterworldspells.Magic.Spells.HitTypes;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Crowd_Control;
@@ -12,56 +11,49 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-public class Confundus extends Crowd_Control implements SpellCasting {
+public class Rictusempra extends Crowd_Control implements SpellCasting {
     private HitTypes hit;
     private Entity hitEnt;
-
-    public Confundus(Wand wand) {
+    Vector dir;
+    public Rictusempra(Wand wand) {
         super(wand);
-
-        double distance = 100D;
-        double spacing = 0.25;
-        long speed = 1;
-        super.cast(distance, spacing, speed, this::whileFiring, this::onHit);
+        final double range = 40D;
+        final double spacing = 0.35;
+        final long speed = 1;
+        player.getWorld().playSound(player.getLocation(), "magic.whoosh3", 100, 1);
+        super.cast(range, spacing, speed, this::whileFiring, this::onHit);
     }
 
     @Override
     public void onHit(Location hitLoc) {
 
-        hitLoc.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, hitLoc, 20, 0, 0, 0, 0.3);
-        hitLoc.getWorld().playSound(hitLoc, "magic.hit", 100, 1);
+        if(hitLoc != null) {
+            player.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, hitLoc, 20, 0, 0, 0, 0.2);
+            hitLoc.getWorld().playSound(hitLoc, "magic.hit", 100, 1);
 
-        if(hit != null && hit == HitTypes.ENTITY) {
+            if(hit == HitTypes.ENTITY){
 
-            if (hitEnt instanceof LivingEntity) {
-                LivingEntity ent = (LivingEntity) hitEnt;
                 new BukkitRunnable() {
+                    short ticks = 0;
                     @Override
                     public void run() {
-                        ent.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 160, 2));
+                        hitEnt.getWorld().playSound(hitEnt.getLocation(), Sound.ENTITY_WITCH_AMBIENT, 50, 5);
+                        hitEnt.getWorld().playSound(hitEnt.getLocation(), Sound.ENTITY_PLAYER_HURT, 50, 1);
+                        hitEnt.setVelocity(dir.clone().setY(0.25));
+                        ticks++;
+                        if(ticks > 5) this.cancel();
                     }
-                }.runTask(plugin);
-                hitLoc.getWorld().playSound(hitLoc, "magic.evilwhoosh3", 100, 1);
-                hitLoc.getWorld().playSound(hitLoc, Sound.ENTITY_VILLAGER_HURT, 100, 1);
-
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_HURT, 100, 1);
-                AnimatedBallEffect effect = new AnimatedBallEffect(plugin.manager);
-                effect.setEntity(ent);
-                effect.asynchronous = true;
-                effect.color = Color.fromRGB(0, 0, 128);
-                effect.particle = Particle.REDSTONE;
-                effect.duration = 8000;
-                effect.offset = new Vector(0, -1, 0);
-                effect.start();
+                }.runTaskTimerAsynchronously(plugin, 0, 5);
 
             }
 
+
         }
+
     }
 
     @Override
@@ -92,6 +84,7 @@ public class Confundus extends Crowd_Control implements SpellCasting {
                     if(entity.getBoundingBox().expand(0.15).contains(p1)){
                         hitEnt = entity;
                         hit = HitTypes.ENTITY;
+                        dir = vector;
                         return loc;
                     }
                 }
@@ -99,6 +92,6 @@ public class Confundus extends Crowd_Control implements SpellCasting {
 
         p1.add(vector);
         return null;
-    }
 
+    }
 }
