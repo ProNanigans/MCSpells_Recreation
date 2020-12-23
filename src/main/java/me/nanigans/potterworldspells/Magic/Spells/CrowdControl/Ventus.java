@@ -12,6 +12,7 @@ public class Ventus extends Crowd_Control {
     public Ventus(Wand wand) {
         super(wand);
 
+        player.getWorld().playSound(player.getLocation(), "magic.healwhoosh1", 100, 1);
         VortexEffect vort = new VortexEffect(plugin.manager);
         vort.asynchronous = true;
         vort.duration = 3000;

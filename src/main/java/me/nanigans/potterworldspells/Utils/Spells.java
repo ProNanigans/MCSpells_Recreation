@@ -24,6 +24,7 @@ public enum Spells {
     PETRIFICUS_TOTALUS("Petrificus Totalus", 107, "CrowdControl", 0, 25D),
     RICTUSEMPRA("Rictusempra", 63, "CrowdControl", 0, 6D),
     VENTUS("Ventus", 64, "CrowdControl", 0, 15D),
+    ALARTE("Alarte", 67, "CrowdControl", 0, 5D),
     APPARATE("Apparate", 9, "Mobility", 0, 20D),
     ASCENDIO("Ascendio", 14, "Mobility", 0, 17D),
     TRIPUDIO("Tripudo", 181, "Mobility", 0, 6D),
