@@ -4,7 +4,7 @@ import me.nanigans.potterworldspells.Magic.Spells.HitTypes;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Crowd_Control;
 import me.nanigans.potterworldspells.Magic.Wand;
-import me.nanigans.potterworldspells.Utils.ParticleUtils;
+import me.nanigans.potterworldspells.Utils.Particles.ParticleUtils;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;

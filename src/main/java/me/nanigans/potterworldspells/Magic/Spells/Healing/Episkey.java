@@ -1,5 +1,6 @@
 package me.nanigans.potterworldspells.Magic.Spells.Healing;
 
+import com.google.common.collect.Maps;
 import de.slikey.effectlib.effect.WarpEffect;
 import me.nanigans.potterworldspells.Magic.Spells.HitTypes;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
@@ -18,6 +19,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import java.util.function.Consumer;
+
 public class Episkey extends Healing implements SpellCasting {
     private final double spacing = 0.25;
     private final double range = Double.parseDouble(getData(this, JsonPaths.RANGE.path));
@@ -33,6 +36,7 @@ public class Episkey extends Healing implements SpellCasting {
         super(wand);
         player.playSound(player.getEyeLocation(), "magic.hit", 500, 1);
         super.cooldDown = Spells.EPISKEY.getCooldown();
+
         cast(range, spacing, 0, this::whileFiring, this::onHit);
         addCooldown();
     }

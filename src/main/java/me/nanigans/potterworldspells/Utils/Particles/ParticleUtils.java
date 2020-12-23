@@ -1,4 +1,4 @@
-package me.nanigans.potterworldspells.Utils;
+package me.nanigans.potterworldspells.Utils.Particles;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
