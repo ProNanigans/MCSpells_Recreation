@@ -2,6 +2,7 @@ package me.nanigans.potterworldspells.Magic.Spells.Defensive;
 
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Defensive;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Data;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -24,7 +25,7 @@ public class Protego extends Defensive {//TODO: figure protego out
                 Vector v = new Vector(x, z, y);
             final Block blockAt = player.getWorld().getBlockAt(v.add(pLoc.toVector()).toLocation(pLoc.getWorld()));
             blockAt.setType(Material.WHITE_STAINED_GLASS);
-            blockAt.setMetadata("Protego", new FixedMetadataValue(plugin, player.getUniqueId().toString()));
+            blockAt.setMetadata(Data.REFLECT.toString(), new FixedMetadataValue(plugin, player.getUniqueId().toString()));
 
         }
 
