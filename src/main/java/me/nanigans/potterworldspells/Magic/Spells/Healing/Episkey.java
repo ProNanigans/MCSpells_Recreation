@@ -85,7 +85,7 @@ public class Episkey extends Healing implements SpellCasting {
         player.getWorld().spawnParticle(Particle.CRIT, p1.getX(), p1.getY()-0.005, p1.getZ(), 2, 0, 0, 0, 0);
 
         Location loc = p1.toLocation(player.getWorld());
-        final Block blockAt = player.getWorld().getBlockAt(loc);
+        final Block blockAt = loc.getBlock();
         if(blockAt.getType().isSolid()){
             hit = HitTypes.BLOCK;
             return loc;

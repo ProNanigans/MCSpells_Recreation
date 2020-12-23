@@ -94,7 +94,7 @@ public class Expelliarmus extends Crowd_Control implements SpellCasting {
         player.getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE, p1.getX(), p1.getY(), p1.getZ(), 0, 0, 0, 0);
 
         final Location location = p1.toLocation(player.getWorld());
-        final Block blockAt = player.getWorld().getBlockAt(location);
+        final Block blockAt = location.getBlock();
         if(blockAt.getType().isSolid()){
 
             if(blockAt.hasMetadata(Data.REFLECT.toString())){

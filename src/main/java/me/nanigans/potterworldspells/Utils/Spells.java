@@ -9,7 +9,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 
-public enum Spells {
+public enum Spells {//TODO: Use FAWE to place blocks
 
     ANTI_APPARATE("Anti Apparate", 2, "CrowdControl", 20, 20D),//name, custom model data
     ACCIO("Accio", 3, "CrowdControl", 0, 12D),
@@ -28,6 +28,7 @@ public enum Spells {
     CONJUNCTIVITIS("Conjunctivitis", 32, "CrowdControl", 0, 20D),
     AGUAMENTI("Aquamenti", 4, "Utility", 0, 5D),
     ALOHOMORA("Alohomora", 6, "Utility", 0, 5D),
+    APARECIUM("Aparecium", 8, "Utility", 0, 5D),
     APPARATE("Apparate", 9, "Mobility", 0, 20D),
     ASCENDIO("Ascendio", 14, "Mobility", 0, 17D),
     TRIPUDIO("Tripudo", 181, "Mobility", 0, 6D),

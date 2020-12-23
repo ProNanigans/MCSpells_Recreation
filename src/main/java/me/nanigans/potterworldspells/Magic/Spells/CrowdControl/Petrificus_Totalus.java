@@ -98,7 +98,7 @@ public class Petrificus_Totalus extends Crowd_Control implements SpellCasting {
         final Location location = p1.toLocation(player.getWorld());
         location.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0.2, 0.2, 0.2, 0);
         location.getWorld().spawnParticle(Particle.ENCHANTMENT_TABLE, location,2, 0, 0, 0, 0);
-        final Block blockAt = player.getWorld().getBlockAt(location);
+        final Block blockAt = location.getBlock();
         if(blockAt.getType().isSolid()){
 
             if(blockAt.hasMetadata(Data.REFLECT.toString())){

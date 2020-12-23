@@ -63,7 +63,7 @@ public class Alarte extends Crowd_Control implements SpellCasting {
                 Color.AQUA, 1
         ));
 
-        final Block blockAt = player.getWorld().getBlockAt(location);
+        final Block blockAt = location.getBlock();
         if(blockAt.getType().isSolid()){
 
             if(blockAt.hasMetadata(Data.REFLECT.toString())){

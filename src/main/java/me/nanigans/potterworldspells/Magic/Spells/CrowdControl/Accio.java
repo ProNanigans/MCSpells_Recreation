@@ -49,7 +49,7 @@ public class Accio extends Crowd_Control implements SpellCasting {
                 2, .5, .5, .5, new Particle.DustOptions(Color.WHITE, 1));
 
         final Location location = p1.toLocation(player.getWorld());
-        final Block block = player.getWorld().getBlockAt(location);
+        final Block block = location.getBlock();
         if(block.getType().isSolid()){
             hit = HitTypes.BLOCK;
             return location;

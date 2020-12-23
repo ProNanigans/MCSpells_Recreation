@@ -72,7 +72,7 @@ public class Confundus extends Crowd_Control implements SpellCasting {
         player.getWorld().spawnParticle(Particle.REDSTONE, p1.getX(), p1.getY(), p1.getZ(), 2, 0, 0, 0,
                 new Particle.DustOptions(Color.fromRGB(0, 0, 128), 1));
 
-        final Block blockAt = player.getWorld().getBlockAt(loc);
+        final Block blockAt = loc.getBlock();
         if(blockAt.getType().isSolid()){
 
             if(blockAt.hasMetadata(Data.REFLECT.toString())){

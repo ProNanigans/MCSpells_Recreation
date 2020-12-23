@@ -59,7 +59,7 @@ public class Flipendo extends Crowd_Control implements SpellCasting {
                 new Particle.DustOptions(Color.WHITE, 0.5F));
 
         Location loc = p1.toLocation(player.getWorld());
-        final Block blockAt = player.getWorld().getBlockAt(loc);
+        final Block blockAt = loc.getBlock();
         if(blockAt.getType().isSolid()){
 
             if(blockAt.hasMetadata(Data.REFLECT.toString())){

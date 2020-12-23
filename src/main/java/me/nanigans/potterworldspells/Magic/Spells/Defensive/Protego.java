@@ -29,7 +29,5 @@ public class Protego extends Defensive {//TODO: figure protego out
 
         }
 
-
-
     }
 }

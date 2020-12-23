@@ -88,7 +88,7 @@ public class Levicorpus extends Crowd_Control implements SpellCasting {
                 Color.PURPLE, 1
         ));
         final Location location = p1.toLocation(player.getWorld());
-        final Block blockAt = player.getWorld().getBlockAt(location);
+        final Block blockAt = location.getBlock();
         if(blockAt.getType().isSolid()){
 
             if(blockAt.hasMetadata(Data.REFLECT.toString())){

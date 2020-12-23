@@ -71,7 +71,7 @@ public class Conjunctivitis extends Crowd_Control implements SpellCasting {
         final Location loc = p1.toLocation(player.getWorld());
         player.spawnParticle(Particle.BLOCK_CRACK, loc, 4, .05, .05, .05, fallingDustData);
 
-        final Block blockAt = loc.getWorld().getBlockAt(loc);
+        final Block blockAt = loc.getBlock();
         if(blockAt.getType().isSolid()) {
             if (blockAt.hasMetadata(Data.REFLECT.toString())) {
                 if (reflectSpell(blockAt, player, p1, vector)) {

@@ -88,7 +88,7 @@ public class Alohomora extends Utility implements SpellCasting {
         if(Math.random() > 0.5)
         location.getWorld().spawnParticle(Particle.FIREWORKS_SPARK, location, 1, 0.1, 0.1, 0.1, 0);
 
-        final Block blockAt = location.getWorld().getBlockAt(location);
+        final Block blockAt = location.getBlock();
         if(blockAt.getType().isSolid()) {
             hit = HitTypes.BLOCK;
             return location;

@@ -47,7 +47,6 @@ public class ParticleUtils {
                     if(distance < radius * radius && !(hollow && distance < ((radius - 1) * (radius - 1)))) {
 
                         Location l = new Location(centerBlock.getWorld(), x, y, z);
-
                         circleBlocks.add(l);
 
                     }
