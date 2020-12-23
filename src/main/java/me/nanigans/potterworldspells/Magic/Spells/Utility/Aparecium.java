@@ -34,8 +34,6 @@ public class Aparecium extends Utility implements SpellCasting {
     public void onHit(Location hitLoc) {
 
         final List<Location> sphere = ParticleUtils.createSphere(hitLoc, 5, false);
-        final boolean[] powered = new boolean[sphere.size()];
-
         new BukkitRunnable() {
             @Override
             public void run() {
