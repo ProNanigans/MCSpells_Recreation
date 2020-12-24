@@ -66,12 +66,13 @@ public class Incarcerum extends Crowd_Control implements SpellCasting {
             final EntityEquipment armor = alive.getEquipment();
 
             final ItemStack head = armor.getHelmet() == null ? null : armor.getHelmet().clone();
-
-            final ItemStack rope = new ItemStack(Material.DIAMOND_SHOVEL);
-            final ItemMeta itemMeta = rope.getItemMeta();
-            itemMeta.setCustomModelData(372);
-            rope.setItemMeta(itemMeta);
-            armor.setHelmet(rope);
+            if(!(head != null && head.getType() == Material.DIAMOND_SHOVEL && head.getItemMeta().getCustomModelData() == 372)) {
+                final ItemStack rope = new ItemStack(Material.DIAMOND_SHOVEL);
+                final ItemMeta itemMeta = rope.getItemMeta();
+                itemMeta.setCustomModelData(372);
+                rope.setItemMeta(itemMeta);
+                armor.setHelmet(rope);
+            }
 
             new BukkitRunnable() {
                 @Override
