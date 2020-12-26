@@ -12,7 +12,8 @@ public enum Data {
     SPELLTYPE("SpellType", PersistentDataType.STRING),
     SPELLVALUE("SpellValue", PersistentDataType.STRING),
     SPELLNAME("SpellName", PersistentDataType.STRING),
-    REFLECT("Reflect", null),
+    REFLECT("Reflect", PersistentDataType.STRING),
+    LOCATION("Location", PersistentDataType.STRING),
     SPREAD("Spread", null);
 
     String name;

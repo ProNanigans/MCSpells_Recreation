@@ -30,6 +30,7 @@ public enum Spells {//TODO: Use FAWE to place blocks
     ALOHOMORA("Alohomora", 6, "Utility", 0, 5D),
     APARECIUM("Aparecium", 8, "Utility", 0, 5D),
     AQUASPHERA("Aquasphera", 187, "Utility", 0, 10D),
+    DEPRIMO("Deprimo", 37, "Utility", 0, 10D),
     APPARATE("Apparate", 9, "Mobility", 0, 20D),
     ASCENDIO("Ascendio", 14, "Mobility", 0, 17D),
     TRIPUDIO("Tripudo", 181, "Mobility", 0, 6D),

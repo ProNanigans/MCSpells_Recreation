@@ -2,14 +2,17 @@ package me.nanigans.potterworldspells.Magic.Spells.Healing;
 
 import de.slikey.effectlib.effect.HelixEffect;
 import de.slikey.effectlib.effect.WarpEffect;
+import me.nanigans.potterworldspells.Magic.Spells.HitTypes;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Healing;
 import me.nanigans.potterworldspells.Magic.Wand;
+import me.nanigans.potterworldspells.Utils.Data;
 import me.nanigans.potterworldspells.Utils.Spells;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -86,8 +89,15 @@ public class Vulnera extends Healing implements SpellCasting {
         Location loc = p1.toLocation(player.getWorld());
         player.getWorld().spawnParticle(Particle.HEART, p1.getX(), p1.getY(), p1.getZ(), 1, .5, .5, .5, 0);
 
-        if(loc.getWorld().getBlockAt(loc).getType().isSolid())
+        final Block blockAt = loc.getBlock();
+        if(blockAt.getType().isSolid()) {
+            if (blockAt.hasMetadata(Data.REFLECT.toString())) {
+                if (reflectSpell(blockAt, player, p1, vector)) {
+                    return null;
+                }
+            }
             return loc;
+        }
 
         p1.add(vector.subtract(new Vector(0, gravity, 0)));
 
