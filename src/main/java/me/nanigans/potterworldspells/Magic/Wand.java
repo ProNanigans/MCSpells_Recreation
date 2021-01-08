@@ -71,6 +71,66 @@ public class Wand implements Listener {
 
     }
 
+    /**
+     * Gets the spell from the current inventory if it exists.
+     * @param spell Spell to search for
+     * @return the itemstack of the spell found in the players inventory
+     */
+    public ItemStack getSpellByName(Spells spell){
+
+        for (Map.Entry<String, Map<String, Map<Integer, ItemStack>>> inventory : this.wandInventory.entrySet()) {
+
+            for (Map.Entry<String, Map<Integer, ItemStack>> page : inventory.getValue().entrySet()) {
+
+                for (Map.Entry<Integer, ItemStack> wand : page.getValue().entrySet()) {
+
+                    if (ItemUtils.hasNBT(wand.getValue(), Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
+
+                        if (ItemUtils.getNBT(wand.getValue(), Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).equals(spell.getName()))
+                            return wand.getValue();
+                    }
+
+                }
+
+            }
+
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Gets multiple spells by their name
+     * @param spell the spell enum for the spell
+     * @return a list of itemstacks that match to those spells
+     */
+    public List<ItemStack> getSpellsByName(Spells... spell){
+
+        final List<ItemStack> foundSpells = new ArrayList<>();
+        for (Map.Entry<String, Map<String, Map<Integer, ItemStack>>> inventory : this.wandInventory.entrySet()) {
+
+            for (Map.Entry<String, Map<Integer, ItemStack>> page : inventory.getValue().entrySet()) {
+
+                for (Map.Entry<Integer, ItemStack> wand : page.getValue().entrySet()) {
+
+                    if (ItemUtils.hasNBT(wand.getValue(), Data.SPELLNAME.toString(), Data.SPELLNAME.getType())) {
+
+                        final Object nbt = ItemUtils.getNBT(wand.getValue(), Data.SPELLNAME.toString(), Data.SPELLNAME.getType());
+                        if (Arrays.stream(spell).map(Spells::getName).anyMatch(i -> i.equals(nbt.toString()))) {
+                            foundSpells.add(wand.getValue());
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+
+        return foundSpells;
+
+    }
 
     /**
      * Event for swapping inventory
@@ -426,6 +486,7 @@ public class Wand implements Listener {
 
         }
     }
+
 
     /**
      * Loads the player inventory. Checks if they're trying to load the wand inventory or their actual inventory

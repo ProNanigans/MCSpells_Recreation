@@ -4,7 +4,6 @@ import me.nanigans.potterworldspells.PotterWorldSpells;
 import me.nanigans.potterworldspells.Utils.Config.YamlGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -44,6 +43,7 @@ public class ItemUtils {
             ItemMeta meta = item.getItemMeta().clone();
             meta.getPersistentDataContainer().remove(new NamespacedKey(plugin, key));
             item.setItemMeta(meta);
+
         }
     }
 
