@@ -12,7 +12,7 @@ public class Disappearus extends Defensive {
     private final int duration = 120;
     public Disappearus(Wand wand) {
         super(wand);
-        super.cooldDown = Spells.DISAPPEARUS.getCooldown();
+        super.cooldown = Spells.DISAPPEARUS.getCooldown();
         addCooldown();
         SphereEffect sphere = new SphereEffect(plugin.manager);
         sphere.asynchronous = true;

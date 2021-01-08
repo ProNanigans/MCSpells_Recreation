@@ -12,7 +12,7 @@ public class Flame_Freeze extends Defensive {
 
     public Flame_Freeze(Wand wand) {
         super(wand);
-        super.cooldDown = Spells.FLAME_FREEZE.getCooldown();
+        super.cooldown = Spells.FLAME_FREEZE.getCooldown();
         addCooldown();
 
         FountainEffect f = new FountainEffect(plugin.manager);

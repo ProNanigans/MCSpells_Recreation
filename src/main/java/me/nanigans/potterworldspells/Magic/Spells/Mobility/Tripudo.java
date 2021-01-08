@@ -15,7 +15,7 @@ public class Tripudo extends Mobility {
 
     public Tripudo(Wand wand) {
         super(wand);
-        super.cooldDown = Spells.TRIPUDIO.getCooldown();
+        super.cooldown = Spells.TRIPUDIO.getCooldown();
         player.playSound(player.getEyeLocation(), "magic.whoosh6", 1, 1);
         WarpEffect warp = new WarpEffect(plugin.manager);
         warp.asynchronous = true;

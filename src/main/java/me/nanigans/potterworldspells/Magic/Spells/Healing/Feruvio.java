@@ -15,7 +15,7 @@ public class Feruvio extends Healing {
     private final int duration = Integer.parseInt(getData(this, JsonPaths.DURATION.path));
     public Feruvio(Wand wand) {
         super(wand);
-        super.cooldDown = Spells.FERUVIO.getCooldown();
+        super.cooldown = Spells.FERUVIO.getCooldown();
         player.playSound(player.getEyeLocation(), "magic.heal1", 1, 1);
 
         player.playSound(player.getEyeLocation(), "magic.healwhoosh2", 1, 1);
@@ -33,6 +33,7 @@ public class Feruvio extends Healing {
         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, duration*20, 1));
         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration*20, 2));
         addCooldown();
+        addCooldownToOthers(this);
 
     }
 

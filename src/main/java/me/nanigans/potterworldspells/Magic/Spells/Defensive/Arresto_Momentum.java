@@ -10,7 +10,7 @@ import org.bukkit.util.Vector;
 public class Arresto_Momentum extends Defensive {
     public Arresto_Momentum(Wand wand) {
         super(wand);
-        super.cooldDown = Spells.ARRESTO_MOMENTUM.getCooldown();
+        super.cooldown = Spells.ARRESTO_MOMENTUM.getCooldown();
         saveFallTime = System.currentTimeMillis()+15000;
         addCooldown();
         WarpEffect effect = new WarpEffect(plugin.manager);

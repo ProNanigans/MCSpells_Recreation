@@ -13,7 +13,7 @@ public class Fortificus extends Defensive {
 
     public Fortificus(Wand wand) {
         super(wand);
-        super.cooldDown = Spells.FORTIFICUS.getCooldown();
+        super.cooldown = Spells.FORTIFICUS.getCooldown();
         addCooldown();
         SphereEffect sphere = new SphereEffect(plugin.manager);
         sphere.asynchronous = true;

@@ -15,7 +15,7 @@ public class Volo extends Mobility {
 
     public Volo(Wand wand) {
         super(wand);
-        super.cooldDown = Spells.VOLO.getCooldown();
+        super.cooldown = Spells.VOLO.getCooldown();
         player.playSound(player.getEyeLocation(), "magic.whoosh6", 1, 1);
 
         WarpEffect warp = new WarpEffect(plugin.manager);

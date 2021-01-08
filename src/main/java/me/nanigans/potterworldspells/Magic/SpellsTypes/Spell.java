@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 abstract public class Spell implements Listener {
-    protected double cooldDown = 0D;// in seconds
+    protected double cooldown = 0D;// in seconds
     protected Wand wand;
     protected Player player;
     protected PotterWorldSpells plugin;
@@ -58,6 +58,7 @@ abstract public class Spell implements Listener {
      * @requires speed >= 0
      */
     protected void cast(double castDistance, double spacing, final long speed, Callback locCb, Consumer<Location> endCb){
+
         Location p2 = player.getLocation().add(player.getLocation().getDirection().multiply(castDistance));
         double distance = getSpellCastLoc().distance(p2);
         Vector p1 = getSpellCastLoc().toVector();
@@ -118,8 +119,8 @@ abstract public class Spell implements Listener {
     public void addCooldown(){
 
         final ItemStack lastSpell = wand.getLastSpell();
-        lastSpell.setAmount((int)this.cooldDown);
-        long time = (long) (System.currentTimeMillis() + (this.cooldDown*1000));
+        lastSpell.setAmount((int)this.cooldown);
+        long time = (long) (System.currentTimeMillis() + (this.cooldown *1000));
         ItemUtils.setData(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType(), time);
         wand.updateWand();
 
@@ -290,5 +291,18 @@ abstract public class Spell implements Listener {
         return location.clone().add(new Vector(Math.cos(angle), 0, Math.sin(angle)).normalize().multiply(0.3));
     }
 
+
+
+    public Wand getWand() {
+        return wand;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public double getCooldown(){
+        return cooldown;
+    }
 
 }

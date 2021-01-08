@@ -14,7 +14,7 @@ public class Ascendio extends Mobility{
     public Ascendio(Wand wand) {
         super(wand);
 
-        super.cooldDown = Spells.ASCENDIO.getCooldown();
+        super.cooldown = Spells.ASCENDIO.getCooldown();
         player.getWorld().playSound(player.getEyeLocation(), "magic.ascendio1", 2, 1);
         final Vector direction = player.getEyeLocation().getDirection();
         player.setVelocity(direction.multiply(launchAmt));

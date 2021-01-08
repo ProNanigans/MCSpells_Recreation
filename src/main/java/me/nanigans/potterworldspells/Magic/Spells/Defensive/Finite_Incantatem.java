@@ -12,7 +12,7 @@ import org.bukkit.potion.PotionEffectType;
 public class Finite_Incantatem extends Defensive {
     public Finite_Incantatem(Wand wand) {
         super(wand);
-        super.cooldDown = Spells.FINITE_INCANTATEM.getCooldown();
+        super.cooldown = Spells.FINITE_INCANTATEM.getCooldown();
         addCooldown();
         AtomEffect atom = new AtomEffect(plugin.manager);
         atom.asynchronous = true;

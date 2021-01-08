@@ -19,8 +19,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.function.Consumer;
-
 public class Episkey extends Healing implements SpellCasting {
     private final double spacing = 0.25;
     private final double range = Double.parseDouble(getData(this, JsonPaths.RANGE.path));
@@ -35,10 +33,11 @@ public class Episkey extends Healing implements SpellCasting {
     public Episkey(Wand wand) {
         super(wand);
         player.playSound(player.getEyeLocation(), "magic.hit", 500, 1);
-        super.cooldDown = Spells.EPISKEY.getCooldown();
+        super.cooldown = Spells.EPISKEY.getCooldown();
 
         cast(range, spacing, 0, this::whileFiring, this::onHit);
         addCooldown();
+        addCooldownToOthers(this);
     }
 
     @Override

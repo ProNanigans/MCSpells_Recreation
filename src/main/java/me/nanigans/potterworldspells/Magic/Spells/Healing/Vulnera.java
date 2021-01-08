@@ -2,7 +2,6 @@ package me.nanigans.potterworldspells.Magic.Spells.Healing;
 
 import de.slikey.effectlib.effect.HelixEffect;
 import de.slikey.effectlib.effect.WarpEffect;
-import me.nanigans.potterworldspells.Magic.Spells.HitTypes;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Healing;
 import me.nanigans.potterworldspells.Magic.Wand;
@@ -27,9 +26,11 @@ public class Vulnera extends Healing implements SpellCasting {
 
     public Vulnera(Wand wand) {
         super(wand);
-        super.cooldDown = Spells.VULNERA.getCooldown();
+        super.cooldown = Spells.VULNERA.getCooldown();
         cast(range, 0.5, 3, this::whileFiring, this::onHit);
         addCooldown();
+        addCooldownToOthers(this);
+
     }
 
     @Override

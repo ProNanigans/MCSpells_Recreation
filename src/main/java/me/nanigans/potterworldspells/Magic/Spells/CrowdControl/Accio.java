@@ -19,7 +19,7 @@ public class Accio extends Crowd_Control implements SpellCasting {
 
     public Accio(Wand wand) {
         super(wand);
-        super.cooldDown = 12D;
+        super.cooldown = 12D;
         double distance = 30D;
         ending = player.getLocation().add(player.getLocation().getDirection().multiply(distance)).toVector();
         double spacing = 0.5;

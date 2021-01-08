@@ -5,13 +5,9 @@ import de.slikey.effectlib.util.DynamicLocation;
 import me.nanigans.potterworldspells.Magic.Spells.SpellCasting;
 import me.nanigans.potterworldspells.Magic.SpellsTypes.Mobility;
 import me.nanigans.potterworldspells.Magic.Wand;
-import me.nanigans.potterworldspells.Utils.Data;
-import me.nanigans.potterworldspells.Utils.ItemUtils;
 import me.nanigans.potterworldspells.Utils.Spells;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -28,7 +24,7 @@ public class Apparate extends Mobility implements SpellCasting {
     public Apparate(Wand wand) {
         super(wand);
 
-            super.cooldDown = Spells.APPARATE.getCooldown();
+            super.cooldown = Spells.APPARATE.getCooldown();
             addCooldown();
 
             AnimatedBallEffect ball = new AnimatedBallEffect(plugin.manager);
