@@ -1,5 +1,6 @@
 package me.nanigans.potterworldspells.Magic.SpellsTypes;
 
+import me.nanigans.potterworldspells.Magic.Cooldown;
 import me.nanigans.potterworldspells.Magic.Wand;
 import me.nanigans.potterworldspells.PotterWorldSpells;
 import me.nanigans.potterworldspells.Utils.Config.JsonPaths;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Timer;
 import java.util.function.Consumer;
 
 abstract public class Spell implements Listener {
@@ -33,7 +35,7 @@ abstract public class Spell implements Listener {
     protected Player player;
     protected PotterWorldSpells plugin;
     protected ItemStack spell;
-    protected BukkitRunnable task;
+    protected Timer task;
     protected long saveFallTime = 0;
     protected JsonUtils data = new JsonUtils();
     protected boolean ignoreCancel = false;
@@ -124,30 +126,12 @@ abstract public class Spell implements Listener {
         ItemUtils.setData(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType(), time);
         wand.updateWand();
 
-        final Spell that = this;
-        BukkitRunnable task = new BukkitRunnable() {
-            final long spellTime = (long) ItemUtils.getNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
-            @Override
-            public void run() {
-                if (wand.getPlayer().getInventory().first(lastSpell) == -1) {
-                    this.cancel();
-                }
-                final long time = System.currentTimeMillis();
-                if(spellTime > time){
-                    if(lastSpell.getAmount() > 1)
-                        lastSpell.setAmount(Math.max(lastSpell.getAmount()-1, 1));
-                }else{
-                    ItemUtils.removeNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
-                    wand.updateWand();
-                    wand.getActiveSpellCDS().remove(that);
-                    this.cancel();
-                }
+        Timer t = new Timer();
+        final Cooldown cooldown = new Cooldown(this);
+        t.schedule(cooldown, 1000, 1000);
 
-            }
-        };
-        task.runTaskTimerAsynchronously(plugin, 20, 20);
-        this.task = task;
-        this.wand.getActiveSpellCDS().put(lastSpell.getItemMeta().getDisplayName(), task);
+        this.task = t;
+        this.wand.getActiveSpellCDS().put(ItemUtils.getNBT(lastSpell, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString(), t);
 
     }
 

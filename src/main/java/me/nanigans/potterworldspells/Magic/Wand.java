@@ -42,7 +42,7 @@ public class Wand implements Listener {
     private int hotbarPage = 1;
     private final PotterWorldSpells plugin = PotterWorldSpells.getPlugin(PotterWorldSpells.class);
     public static Map<UUID, Wand> inWand = new HashMap<>();
-    private final Map<String, BukkitRunnable> activeSpellCDS = new HashMap<>();
+    private final Map<String, Timer> activeSpellCDS = new HashMap<>();
     private double mana = 100;
     private ItemStack lastSpell;
     public final static short maxHotBarPages = 2;
@@ -816,30 +816,13 @@ public class Wand implements Listener {
 
             final ItemStack lastSpell = item;
             lastSpell.setAmount((int) cooldown);
-            long time = (long) (System.currentTimeMillis() + (cooldown * 1000));
-            ItemUtils.setData(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType(), time);
+            ItemUtils.setData(item, Data.COOLDOWN.toString(), Data.COOLDOWN.getType(), time);
 
-            BukkitRunnable task = (BukkitRunnable) new BukkitRunnable() {
-                final long spellTime = (long) ItemUtils.getNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
+            Timer task = new Timer();
+                final Cooldown cooldown1 = new Cooldown(cooldown, item);
+                task.schedule(cooldown1, 1000, 1000);
+                wand.getActiveSpellCDS().put(ItemUtils.getNBT(item, Data.SPELLNAME.toString(), Data.SPELLNAME.getType()).toString(), task);
 
-                @Override
-                public void run() {
-                    if (wand.getPlayer().getInventory().first(lastSpell) == -1) {
-                        this.cancel();
-                    }
-                    final long time = System.currentTimeMillis();
-                    if (spellTime > time) {
-                        if (lastSpell.getAmount() > 1)
-                            lastSpell.setAmount(Math.max(lastSpell.getAmount() - 1, 1));
-                    } else {
-                        ItemUtils.removeNBT(lastSpell, Data.COOLDOWN.toString(), Data.COOLDOWN.getType());
-                        wand.getActiveSpellCDS().remove(this);
-                        this.cancel();
-                    }
-
-                }
-            }.runTaskTimerAsynchronously(wand.plugin, 20, 20);
-            wand.getActiveSpellCDS().put(lastSpell.getItemMeta().getDisplayName(), task);
         }
     }
 
@@ -875,7 +858,7 @@ public class Wand implements Listener {
         this.mana = mana;
     }
 
-    public Map<String, BukkitRunnable> getActiveSpellCDS() {
+    public Map<String, Timer> getActiveSpellCDS() {
         return activeSpellCDS;
     }
 
